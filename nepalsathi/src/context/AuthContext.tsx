@@ -98,7 +98,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (error) {
       registrationInProgress.current = false;
-      return { success: false, error: error.message || 'Registration failed.' };
+      const msg = typeof error.message === 'string' ? error.message : 'Registration failed.';
+      if (msg.includes('Database error saving new user')) {
+        return {
+          success: false,
+          error: 'Database setup issue. Please run the SQL fix in your Supabase dashboard (see instruction below the form).',
+        };
+      }
+      return { success: false, error: msg };
     }
 
     if (!data.user) {
@@ -112,6 +119,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         registrationInProgress.current = false;
         return { success: false, error: 'Account created. Please check your email to verify, then sign in.' };
       }
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    const { error: profileError } = await supabase.from('profiles').upsert({
+      id: data.user.id,
+      name,
+      email,
+      avatar: '',
+      level: 1,
+      xp: 0,
+      preferences: { language: 'English', notifications: true, darkMode: false },
+    });
+
+    if (profileError) {
+      registrationInProgress.current = false;
+      return { success: false, error: 'Account created but profile setup failed. Please try signing in.' };
     }
 
     await fetchProfile(data.user.id);

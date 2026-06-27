@@ -13,6 +13,16 @@ interface FieldErrors {
   password?: string;
 }
 
+const SQL_FIX_INSTRUCTION = `⚠️ Database setup issue detected.
+
+Please run this SQL in your Supabase SQL Editor to fix:
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+DROP FUNCTION IF EXISTS public.handle_new_user();
+DROP FUNCTION IF EXISTS handle_new_user();
+
+Then try signing up again.`;
+
 export default function Register() {
   const navigate = useNavigate();
   const { register } = useAuth();
@@ -68,6 +78,8 @@ export default function Register() {
       if (result.error && result.error.includes('check your email')) {
         addToast('success', 'Account created! Check your email to verify, then sign in.');
         setGeneralError(errMsg);
+      } else if (result.error && result.error.includes('Database setup issue')) {
+        setGeneralError(SQL_FIX_INSTRUCTION);
       } else {
         setGeneralError(errMsg);
       }
