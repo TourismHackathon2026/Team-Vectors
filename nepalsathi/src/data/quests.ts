@@ -21,4 +21,9 @@ export const quests: Quest[] = [
   { id: 'quest-18', title: 'Spice Market Explorer', description: 'Identify five different Nepali spices at a local market.', xpReward: 100, category: 'Food', completed: false, icon: 'Soup' },
   { id: 'quest-19', title: 'Village Weaver', description: 'Watch traditional weaving at a village cooperative.', xpReward: 200, category: 'Crafts', completed: false, icon: 'Fabric' },
   { id: 'quest-20', title: 'Sunset at the Stupa', description: 'Watch sunset from Boudhanath with the locals.', xpReward: 150, category: 'Culture', completed: false, icon: 'Sunset' },
+
+  // Secret questline — hidden until all Heritage quests are completed
+  { id: 'quest-21', title: '🗝️ The Lost Temple of Kathmandu', description: 'Find the hidden temple beneath the city streets. Speak to three local elders for clues.', xpReward: 500, category: 'Hidden Gems', completed: false, icon: 'Key' },
+  { id: 'quest-22', title: '🗝️ Guardian of the Valley', description: 'Collect stamps at all 7 UNESCO sites in Kathmandu Valley. The ancient guardians will recognize you.', xpReward: 1000, category: 'Heritage', completed: false, icon: 'Shield' },
+  { id: 'quest-23', title: '🗝️ The Final Pilgrimage', description: 'Complete all Heritage and Hidden Gems quests. The secret path to the Lost Valley is revealed only to true explorers.', xpReward: 2000, category: 'Hidden Gems', completed: false, icon: 'Trophy' },
 ];

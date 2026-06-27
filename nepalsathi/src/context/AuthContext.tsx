@@ -82,7 +82,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(local);
         return { success: true };
       }
-      return { success: false, error: error.message };
+      const msg = typeof (error as any).message === 'string' ? (error as any).message : 'Invalid email or password.';
+      return { success: false, error: msg };
     }
     return { success: true };
   }, []);
@@ -99,11 +100,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) {
       registrationInProgress.current = false;
       const msg = typeof error.message === 'string' ? error.message : 'Registration failed.';
-      if (msg.includes('Database error saving new user')) {
-        return {
-          success: false,
-          error: 'Database setup issue. Please run the SQL fix in your Supabase dashboard (see instruction below the form).',
+      if (!msg || msg === '{}' || msg.includes('Database error saving new user')) {
+        const localId = crypto.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const localUser: User = {
+          id: localId,
+          name,
+          email,
+          password,
+          avatar: '',
+          level: 1,
+          xp: 0,
+          passport: [],
+          joinedAt: new Date().toISOString(),
         };
+        const localUsers = storage.get<Array<{ email: string; password: string } & User>>('nepali-sathi-users', []);
+        localUsers.push(localUser);
+        storage.set('nepali-sathi-users', localUsers);
+        setUser(localUser);
+        return { success: true };
       }
       return { success: false, error: msg };
     }

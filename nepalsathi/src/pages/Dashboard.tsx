@@ -1,32 +1,42 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { MapPin, Stamp, Route, TrendingUp, Compass, Bot, BookOpen, Phone, Trophy } from 'lucide-react';
+import { MapPin, Stamp, Route, TrendingUp, Compass, Bot, BookOpen, Phone, Trophy, Award } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 import { getLevelTitle, calculateLevel, getTimeAgo } from '../utils/helpers';
 
-const quickActions = [
-  { label: 'Explore Map', path: '/explore-map', icon: Compass, color: 'text-primary bg-primary-50' },
-  { label: 'AI Assistant', path: '#', icon: Bot, color: 'text-secondary bg-secondary-50' },
-  { label: 'Passport', path: '/passport', icon: Stamp, color: 'text-primary bg-primary-50' },
-  { label: 'Memory Book', path: '/memory-book', icon: BookOpen, color: 'text-accent bg-accent-50' },
-  { label: 'Emergency', path: '/emergency', icon: Phone, color: 'text-red-500 bg-red-50' },
-  { label: 'Quests', path: '/quests', icon: Trophy, color: 'text-secondary bg-secondary-50' },
-];
-
 export default function Dashboard() {
   const { user } = useAuth();
-  const { recentActivity, passportStamps } = useData();
+  const { recentActivity, passportStamps, itinerary, achievements } = useData();
 
   const levelInfo = user ? calculateLevel(user.xp) : { level: 1, currentXp: 0, nextLevelXp: 101 };
+
+  const daysActive = user
+    ? Math.max(1, Math.floor((Date.now() - new Date(user.joinedAt).getTime()) / (1000 * 60 * 60 * 24)))
+    : 0;
 
   const stats = [
     { label: 'Sites Visited', value: String(passportStamps.length), icon: MapPin },
     { label: 'Stamps Collected', value: String(passportStamps.length), icon: Stamp },
-    { label: 'Routes Planned', value: '3', icon: Route },
-    { label: 'Days Active', value: user ? '1' : '0', icon: TrendingUp },
+    { label: 'Routes Planned', value: String(itinerary.length), icon: Route },
+    { label: 'Days Active', value: String(daysActive), icon: TrendingUp },
+  ];
+
+  const unlockedAchievements = achievements.filter((a) => a.unlocked);
+
+  const openAIChat = () => {
+    window.dispatchEvent(new CustomEvent('opencode-ai-chat'));
+  };
+
+  const quickActions = [
+    { label: 'Explore Map', path: '/explore-map', icon: Compass, color: 'text-primary bg-primary-50', onClick: undefined },
+    { label: 'AI Assistant', path: null, icon: Bot, color: 'text-secondary bg-secondary-50', onClick: openAIChat },
+    { label: 'Passport', path: '/passport', icon: Stamp, color: 'text-primary bg-primary-50', onClick: undefined },
+    { label: 'Memory Book', path: '/memory-book', icon: BookOpen, color: 'text-accent bg-accent-50', onClick: undefined },
+    { label: 'Emergency', path: '/emergency', icon: Phone, color: 'text-red-500 bg-red-50', onClick: undefined },
+    { label: 'Quests', path: '/quests', icon: Trophy, color: 'text-secondary bg-secondary-50', onClick: undefined },
   ];
 
   return (
@@ -111,17 +121,50 @@ export default function Dashboard() {
             <h2 className="text-lg font-semibold text-text-primary mb-4">Quick Actions</h2>
             <div className="grid grid-cols-2 gap-3">
               {quickActions.map((action) => (
-                <Link key={action.label} to={action.path}>
-                  <Card hover padding="sm" className="flex items-center gap-3">
-                    <div className={`w-9 h-9 rounded-lg ${action.color} flex items-center justify-center`}>
-                      <action.icon className="w-4 h-4" />
-                    </div>
-                    <span className="text-sm font-medium text-text-primary">{action.label}</span>
-                  </Card>
-                </Link>
+                action.onClick ? (
+                  <button key={action.label} onClick={action.onClick} className="w-full text-left">
+                    <Card hover padding="sm" className="flex items-center gap-3">
+                      <div className={`w-9 h-9 rounded-lg ${action.color} flex items-center justify-center`}>
+                        <action.icon className="w-4 h-4" />
+                      </div>
+                      <span className="text-sm font-medium text-text-primary">{action.label}</span>
+                    </Card>
+                  </button>
+                ) : (
+                  <Link key={action.label} to={action.path!}>
+                    <Card hover padding="sm" className="flex items-center gap-3">
+                      <div className={`w-9 h-9 rounded-lg ${action.color} flex items-center justify-center`}>
+                        <action.icon className="w-4 h-4" />
+                      </div>
+                      <span className="text-sm font-medium text-text-primary">{action.label}</span>
+                    </Card>
+                  </Link>
+                )
               ))}
             </div>
           </motion.div>
+
+          {unlockedAchievements.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.12 }}
+              className="mt-6"
+            >
+              <h2 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
+                <Award className="w-5 h-5 text-secondary" />
+                Achievements ({unlockedAchievements.length})
+              </h2>
+              <div className="flex flex-wrap gap-2">
+                {unlockedAchievements.map((a) => (
+                  <Badge key={a.id} variant="primary" size="md" className="gap-1.5">
+                    <Award className="w-3.5 h-3.5" />
+                    {a.title}
+                  </Badge>
+                ))}
+              </div>
+            </motion.div>
+          )}
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}

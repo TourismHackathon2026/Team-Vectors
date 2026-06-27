@@ -7,13 +7,15 @@ import { Badge } from '../components/ui/Badge';
 import { StarRating } from '../components/ui/StarRating';
 import { AIStoryMode } from '../components/AIStoryMode';
 import { heritageSites } from '../data/heritage';
+import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 import { useToast } from '../context/ToastContext';
 
 export default function HeritageDetails() {
   const { id } = useParams<{ id: string }>();
   const site = heritageSites.find((s) => s.id === id);
-  const { passportStamps, addStamp, addXp, addActivity, unlockAchievement } = useData();
+  const { user, updateProfile } = useAuth();
+  const { passportStamps, addStamp, addActivity, unlockAchievement } = useData();
   const { addToast } = useToast();
   const [justCollected, setJustCollected] = useState(false);
 
@@ -37,7 +39,9 @@ export default function HeritageDetails() {
   const handleCollect = () => {
     if (alreadyCollected) return;
     addStamp(site.id, site.name);
-    addXp(50);
+    if (user) {
+      updateProfile({ xp: (user.xp || 0) + 50 });
+    }
     addActivity('stamp', `Collected stamp at ${site.name}`);
     addToast('success', `Stamp collected at ${site.name}! +50 XP`);
     if (passportStamps.length + 1 >= 10) {

@@ -164,8 +164,8 @@ export default function Register() {
 
           <p className="text-xs text-text-secondary">
             By signing up, you agree to our{' '}
-            <a href="#" className="text-primary hover:underline">Terms of Service</a> and{' '}
-            <a href="#" className="text-primary hover:underline">Privacy Policy</a>.
+            <a href="/faq" className="text-primary hover:underline">Terms of Service</a> and{' '}
+            <a href="/privacy" className="text-primary hover:underline">Privacy Policy</a>.
           </p>
 
           <Button type="submit" className="w-full" loading={loading}>

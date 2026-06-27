@@ -43,13 +43,21 @@ export default function Login() {
     if (!validateForm()) return;
 
     setLoading(true);
-    const result = await login(form.email.trim(), form.password);
+    let result: { success: boolean; error?: string };
+    try {
+      result = await login(form.email.trim(), form.password);
+    } catch {
+      setLoading(false);
+      addToast('error', 'Something went wrong. Please try again.');
+      return;
+    }
     setLoading(false);
     if (result.success) {
       addToast('success', 'Welcome back!');
       navigate('/dashboard');
     } else {
-      addToast('error', result.error || 'Invalid email or password.');
+      const errMsg = typeof result.error === 'string' ? result.error : 'Invalid email or password.';
+      addToast('error', errMsg);
     }
   };
 
