@@ -36,9 +36,9 @@ function HeroSection() {
           >
             Discover Kathmandu,
             <br />
-            <span className="text-secondary">One Heritage Site</span>
+            <span className="text-secondary">Explore As</span>
             <br />
-            at a Time.
+            A Local.
           </motion.h1>
 
           <motion.p
@@ -49,7 +49,7 @@ function HeroSection() {
           >
             Your digital passport to Nepal&apos;s UNESCO World Heritage Sites.
             Collect stamps, uncover stories, and explore the Valley like a local
-            — not a tourist.
+            not a tourist.
           </motion.p>
 
           <motion.div
@@ -385,7 +385,7 @@ function CTASection() {
                 <Button
                   variant="outline"
                   size="lg"
-                  className="border-white/20 text-white hover:bg-white/10 hover:text-white"
+                  className="bg-transparent border-white/30 text-white hover:bg-green/10 hover:text-white gap-2"
                 >
                   Browse Heritage Sites
                 </Button>
