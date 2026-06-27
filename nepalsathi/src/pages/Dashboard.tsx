@@ -1,24 +1,33 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { MapPin, Stamp, Route, TrendingUp } from 'lucide-react';
+import { MapPin, Stamp, Route, TrendingUp, Compass, Bot, BookOpen, Phone, Trophy } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
-import { EmptyState } from '../components/ui/EmptyState';
+import { useAuth } from '../context/AuthContext';
+import { useData } from '../context/DataContext';
 import { passportService } from '../services/passport';
-import { authService } from '../services/passport';
+import { getLevelTitle, calculateLevel, getTimeAgo } from '../utils/helpers';
+
+const quickActions = [
+  { label: 'Explore Map', path: '/explore-map', icon: Compass, color: 'text-primary bg-primary-50' },
+  { label: 'AI Assistant', path: '#', icon: Bot, color: 'text-secondary bg-secondary-50' },
+  { label: 'Passport', path: '/passport', icon: Stamp, color: 'text-primary bg-primary-50' },
+  { label: 'Memory Book', path: '/memory-book', icon: BookOpen, color: 'text-accent bg-accent-50' },
+  { label: 'Emergency', path: '/emergency', icon: Phone, color: 'text-red-500 bg-red-50' },
+  { label: 'Quests', path: '/quests', icon: Trophy, color: 'text-secondary bg-secondary-50' },
+];
 
 export default function Dashboard() {
+  const { user } = useAuth();
+  const { recentActivity, passportStamps } = useData();
   const [entryCount, setEntryCount] = useState(0);
-  const [user, setUser] = useState(authService.getUser());
 
   useEffect(() => {
     setEntryCount(passportService.getEntryCount());
-    const interval = setInterval(() => {
-      setEntryCount(passportService.getEntryCount());
-      setUser(authService.getUser());
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
+  }, [passportStamps]);
+
+  const levelInfo = user ? calculateLevel(user.xp) : { level: 1, currentXp: 0, nextLevelXp: 101 };
 
   const stats = [
     { label: 'Sites Visited', value: String(entryCount), icon: MapPin },
@@ -39,15 +48,45 @@ export default function Dashboard() {
             Overview
           </Badge>
           <h1 className="text-3xl sm:text-4xl font-bold font-serif text-text-primary">
-            Dashboard
+            {user ? `Welcome, ${user.name}` : 'Dashboard'}
           </h1>
           <p className="mt-2 text-text-secondary">
-            {user ? `Welcome back, ${user.name}. ` : ''}
             Track your heritage journey across Nepal.
           </p>
         </motion.div>
 
-        <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {user && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.05 }}
+            className="mt-6 p-5 rounded-xl bg-white border border-border"
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <p className="text-sm font-medium text-text-primary">
+                  Level {levelInfo.level} — {getLevelTitle(levelInfo.level)}
+                </p>
+                <p className="text-xs text-text-secondary">
+                  {user.xp} / {levelInfo.nextLevelXp} XP to next level
+                </p>
+              </div>
+              <div className="w-10 h-10 rounded-full bg-secondary-50 text-secondary flex items-center justify-center font-bold">
+                {levelInfo.level}
+              </div>
+            </div>
+            <div className="h-2 rounded-full bg-gray-100 overflow-hidden">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${Math.min((user.xp / levelInfo.nextLevelXp) * 100, 100)}%` }}
+                transition={{ duration: 0.8, ease: 'easeOut' }}
+                className="h-full rounded-full bg-secondary"
+              />
+            </div>
+          </motion.div>
+        )}
+
+        <div className="mt-6 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {stats.map((stat, i) => (
             <motion.div
               key={stat.label}
@@ -70,22 +109,54 @@ export default function Dashboard() {
           ))}
         </div>
 
-        {entryCount === 0 ? (
-          <Card className="mt-8">
-            <EmptyState
-              icon={<TrendingUp className="w-8 h-8" />}
-              title="Start your journey"
-              description="Visit heritage sites and collect stamps to see your activity here."
-            />
-          </Card>
-        ) : (
-          <Card className="mt-8 p-6">
-            <h2 className="text-lg font-semibold text-text-primary mb-2">Recent Activity</h2>
-            <p className="text-sm text-text-secondary">
-              You have collected {entryCount} stamp{entryCount !== 1 ? 's' : ''} so far. Keep exploring!
-            </p>
-          </Card>
-        )}
+        <div className="mt-8 grid lg:grid-cols-2 gap-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+          >
+            <h2 className="text-lg font-semibold text-text-primary mb-4">Quick Actions</h2>
+            <div className="grid grid-cols-2 gap-3">
+              {quickActions.map((action) => (
+                <Link key={action.label} to={action.path}>
+                  <Card hover padding="sm" className="flex items-center gap-3">
+                    <div className={`w-9 h-9 rounded-lg ${action.color} flex items-center justify-center`}>
+                      <action.icon className="w-4 h-4" />
+                    </div>
+                    <span className="text-sm font-medium text-text-primary">{action.label}</span>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.15 }}
+          >
+            <h2 className="text-lg font-semibold text-text-primary mb-4">Recent Activity</h2>
+            <Card padding="sm">
+              {recentActivity.length === 0 ? (
+                <div className="p-4 text-center">
+                  <TrendingUp className="w-6 h-6 text-text-secondary mx-auto mb-2" />
+                  <p className="text-sm text-text-secondary">No activity yet. Start exploring!</p>
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  {recentActivity.slice(0, 6).map((activity) => (
+                    <div key={activity.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                      <div className="text-xs text-text-secondary shrink-0 mt-0.5">
+                        {getTimeAgo(activity.timestamp)}
+                      </div>
+                      <p className="text-sm text-text-primary">{activity.message}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Card>
+          </motion.div>
+        </div>
       </div>
     </div>
   );

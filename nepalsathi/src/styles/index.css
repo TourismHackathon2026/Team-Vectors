@@ -61,4 +61,39 @@
   * {
     @apply border-border;
   }
+
+  .dark body,
+  .dark {
+    --color-bg: #111827;
+    --color-card: #1f2937;
+    --color-border: #374151;
+    --color-text-primary: #f9fafb;
+    --color-text-secondary: #9ca3af;
+  }
+}
+
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+  border-radius: 0.75rem;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 0.75rem !important;
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+.leaflet-popup-content {
+  margin: 0 !important;
+  min-width: 240px;
+}
+
+.dark .leaflet-popup-content-wrapper {
+  background: #1f2937;
+  color: #f9fafb;
+}
+
+.dark .leaflet-popup-tip {
+  background: #1f2937;
 }

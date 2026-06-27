@@ -8,8 +8,9 @@ import { Button } from './ui/Button';
 const navLinks = [
   { label: 'Home', path: '/' },
   { label: 'Explore', path: '/explore' },
+  { label: 'Map', path: '/explore-map' },
   { label: 'Passport', path: '/passport' },
-  { label: 'Stamps', path: '/stamps' },
+  { label: 'Quests', path: '/quests' },
   { label: 'About', path: '/about' },
   { label: 'Contact', path: '/contact' },
 ];

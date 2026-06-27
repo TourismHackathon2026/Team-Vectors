@@ -5,6 +5,7 @@ import { ArrowLeft, MapPin, Clock, DollarSign, Calendar, Star, Stamp, Check } fr
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { StarRating } from '../components/ui/StarRating';
+import { AIStoryMode } from '../components/AIStoryMode';
 import { heritageSites } from '../data/heritage';
 import { passportService } from '../services/passport';
 
@@ -120,6 +121,8 @@ export default function HeritageDetails() {
               </Button>
             )}
           </div>
+
+          <AIStoryMode siteId={site.id} siteName={site.name} />
         </motion.div>
       </div>
     </div>

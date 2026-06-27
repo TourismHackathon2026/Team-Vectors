@@ -1,6 +1,8 @@
 import { Outlet } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
+import { ToastContainer } from '../components/ui/Toast';
+import { AIChat } from '../components/AIChat';
 
 export function Layout() {
   return (
@@ -10,6 +12,8 @@ export function Layout() {
         <Outlet />
       </main>
       <Footer />
+      <ToastContainer />
+      <AIChat />
     </div>
   );
 }

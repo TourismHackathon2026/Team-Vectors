@@ -4,13 +4,16 @@ import { motion } from 'framer-motion';
 import { MapPin, Eye, EyeOff } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { authService } from '../services/passport';
+import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 export default function Register() {
   const navigate = useNavigate();
+  const { register } = useAuth();
+  const { addToast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
   const [form, setForm] = useState({ name: '', email: '', password: '' });
+  const [error, setError] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,9 +23,18 @@ export default function Register() {
       setError('Please fill in all fields.');
       return;
     }
+    if (form.password.length < 6) {
+      setError('Password must be at least 6 characters.');
+      return;
+    }
 
-    authService.register(form.name.trim(), form.email.trim());
-    navigate('/dashboard');
+    const success = register(form.name.trim(), form.email.trim(), form.password);
+    if (success) {
+      addToast('success', 'Passport created! Welcome to Nepali Sathi.');
+      navigate('/dashboard');
+    } else {
+      setError('An account with this email already exists.');
+    }
   };
 
   return (
@@ -70,7 +82,7 @@ export default function Register() {
               id="password"
               label="Password"
               type={showPassword ? 'text' : 'password'}
-              placeholder="Create a password"
+              placeholder="Create a password (6+ characters)"
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
               required
@@ -86,7 +98,7 @@ export default function Register() {
           </div>
 
           {error && (
-            <p className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg">{error}</p>
+            <p className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 px-3 py-2 rounded-lg">{error}</p>
           )}
 
           <p className="text-xs text-text-secondary">

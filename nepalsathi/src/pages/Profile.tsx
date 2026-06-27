@@ -1,19 +1,14 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { User as UserIcon, Mail, Calendar, MapPin } from 'lucide-react';
+import { User as UserIcon, Mail, Calendar, MapPin, LogOut } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
-import { authService } from '../services/passport';
-import { formatDate } from '../utils/helpers';
-import type { User } from '../types';
+import { useAuth } from '../context/AuthContext';
+import { useData } from '../context/DataContext';
+import { formatDate, getLevelTitle } from '../utils/helpers';
 
 export default function Profile() {
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    setUser(authService.getUser());
-  }, []);
+  const { user, logout } = useAuth();
+  const { passportStamps } = useData();
 
   return (
     <div className="py-16 lg:py-20">
@@ -35,7 +30,7 @@ export default function Profile() {
               {user?.name || 'Your Profile'}
             </h1>
             <p className="mt-1 text-sm text-text-secondary">
-              {user ? 'Manage your account and preferences.' : 'Sign in to see your profile.'}
+              {user ? `Level ${user.level} ${getLevelTitle(user.level)}` : 'Sign in to see your profile.'}
             </p>
           </div>
 
@@ -62,22 +57,26 @@ export default function Profile() {
                 <div>
                   <p className="text-xs text-text-secondary">Stamps Collected</p>
                   <p className="text-sm text-text-primary">
-                    {user?.passport?.length ?? 0}
+                    {passportStamps?.length ?? 0}
                   </p>
                 </div>
               </div>
             </div>
           </Card>
 
-          <div className="mt-6 text-center">
+          <div className="mt-6 flex flex-col items-center gap-3">
             {user ? (
-              <Button variant="outline" disabled>
-                Edit Profile
-              </Button>
+              <>
+                <Button variant="outline" disabled>Edit Profile</Button>
+                <Button variant="ghost" size="sm" onClick={logout} className="gap-2 text-red-500 hover:text-red-600">
+                  <LogOut className="w-4 h-4" />
+                  Sign Out
+                </Button>
+              </>
             ) : (
-              <Link to="/login">
-                <Button variant="primary">Sign In</Button>
-              </Link>
+              <a href="/login">
+                <Button>Sign In</Button>
+              </a>
             )}
           </div>
         </motion.div>

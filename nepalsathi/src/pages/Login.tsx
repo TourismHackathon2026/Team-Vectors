@@ -4,23 +4,27 @@ import { motion } from 'framer-motion';
 import { MapPin, Eye, EyeOff } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { authService } from '../services/passport';
+import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 export default function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
+  const { addToast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
   const [form, setForm] = useState({ email: '', password: '' });
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-
-    const user = authService.login(form.email, form.password);
-    if (user) {
+    setLoading(true);
+    const success = login(form.email, form.password);
+    setLoading(false);
+    if (success) {
+      addToast('success', 'Welcome back!');
       navigate('/dashboard');
     } else {
-      setError('No account found with this email. Please sign up first.');
+      addToast('error', 'No account found with this email.');
     }
   };
 
@@ -74,11 +78,7 @@ export default function Login() {
             </button>
           </div>
 
-          {error && (
-            <p className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg">{error}</p>
-          )}
-
-          <Button type="submit" className="w-full">
+          <Button type="submit" className="w-full" loading={loading}>
             Sign in
           </Button>
         </form>
