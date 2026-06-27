@@ -1,17 +1,32 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Stamp, Route, TrendingUp } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { EmptyState } from '../components/ui/EmptyState';
-
-const stats = [
-  { label: 'Sites Visited', value: '0', icon: MapPin },
-  { label: 'Stamps Collected', value: '0', icon: Stamp },
-  { label: 'Routes Planned', value: '0', icon: Route },
-  { label: 'Days Active', value: '0', icon: TrendingUp },
-];
+import { passportService } from '../services/passport';
+import { authService } from '../services/passport';
 
 export default function Dashboard() {
+  const [entryCount, setEntryCount] = useState(0);
+  const [user, setUser] = useState(authService.getUser());
+
+  useEffect(() => {
+    setEntryCount(passportService.getEntryCount());
+    const interval = setInterval(() => {
+      setEntryCount(passportService.getEntryCount());
+      setUser(authService.getUser());
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const stats = [
+    { label: 'Sites Visited', value: String(entryCount), icon: MapPin },
+    { label: 'Stamps Collected', value: String(entryCount), icon: Stamp },
+    { label: 'Routes Planned', value: '3', icon: Route },
+    { label: 'Days Active', value: user ? '1' : '0', icon: TrendingUp },
+  ];
+
   return (
     <div className="py-16 lg:py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -27,6 +42,7 @@ export default function Dashboard() {
             Dashboard
           </h1>
           <p className="mt-2 text-text-secondary">
+            {user ? `Welcome back, ${user.name}. ` : ''}
             Track your heritage journey across Nepal.
           </p>
         </motion.div>
@@ -54,13 +70,22 @@ export default function Dashboard() {
           ))}
         </div>
 
-        <Card className="mt-8">
-          <EmptyState
-            icon={<TrendingUp className="w-8 h-8" />}
-            title="Start your journey"
-            description="Visit heritage sites and collect stamps to see your activity here."
-          />
-        </Card>
+        {entryCount === 0 ? (
+          <Card className="mt-8">
+            <EmptyState
+              icon={<TrendingUp className="w-8 h-8" />}
+              title="Start your journey"
+              description="Visit heritage sites and collect stamps to see your activity here."
+            />
+          </Card>
+        ) : (
+          <Card className="mt-8 p-6">
+            <h2 className="text-lg font-semibold text-text-primary mb-2">Recent Activity</h2>
+            <p className="text-sm text-text-secondary">
+              You have collected {entryCount} stamp{entryCount !== 1 ? 's' : ''} so far. Keep exploring!
+            </p>
+          </Card>
+        )}
       </div>
     </div>
   );

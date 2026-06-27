@@ -1,11 +1,20 @@
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Stamp } from 'lucide-react';
+import { Stamp, Calendar } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { EmptyState } from '../components/ui/EmptyState';
+import { passportService } from '../services/passport';
+import { formatDate } from '../utils/helpers';
+import type { PassportEntry } from '../types';
 
 export default function Stamps() {
-  const stamps: { id: string; name: string; date: string }[] = [];
+  const [entries, setEntries] = useState<PassportEntry[]>([]);
+
+  useEffect(() => {
+    setEntries(passportService.getEntries());
+  }, []);
 
   return (
     <div className="py-16 lg:py-20">
@@ -23,10 +32,13 @@ export default function Stamps() {
           </h1>
           <p className="mt-2 text-text-secondary">
             Every heritage site you visit rewards you with a unique stamp.
+            {entries.length > 0 && (
+              <span className="font-medium text-secondary"> {entries.length} stamp{entries.length !== 1 ? 's' : ''} collected.</span>
+            )}
           </p>
         </motion.div>
 
-        {stamps.length === 0 ? (
+        {entries.length === 0 ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -42,10 +54,28 @@ export default function Stamps() {
           </motion.div>
         ) : (
           <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {stamps.map((stamp) => (
-              <Card key={stamp.id}>
-                <p>{stamp.name}</p>
-              </Card>
+            {entries.map((entry, i) => (
+              <motion.div
+                key={entry.id}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3, delay: i * 0.04 }}
+              >
+                <Link to={`/heritage/${entry.siteId}`}>
+                  <Card hover padding="lg" className="text-center h-full">
+                    <div className="w-16 h-16 rounded-2xl bg-secondary-50 text-secondary flex items-center justify-center mx-auto mb-4">
+                      <Stamp className="w-7 h-7" />
+                    </div>
+                    <h3 className="text-sm font-semibold text-text-primary mb-1">
+                      {entry.siteName}
+                    </h3>
+                    <div className="flex items-center justify-center gap-1.5 text-xs text-text-secondary">
+                      <Calendar className="w-3 h-3" />
+                      {formatDate(entry.visitedAt)}
+                    </div>
+                  </Card>
+                </Link>
+              </motion.div>
             ))}
           </div>
         )}

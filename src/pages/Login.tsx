@@ -1,16 +1,27 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { MapPin, Eye, EyeOff } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
+import { authService } from '../services/passport';
 
 export default function Login() {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
   const [form, setForm] = useState({ email: '', password: '' });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+
+    const user = authService.login(form.email, form.password);
+    if (user) {
+      navigate('/dashboard');
+    } else {
+      setError('No account found with this email. Please sign up first.');
+    }
   };
 
   return (
@@ -63,15 +74,9 @@ export default function Login() {
             </button>
           </div>
 
-          <div className="flex items-center justify-between text-sm">
-            <label className="flex items-center gap-2 text-text-secondary cursor-pointer">
-              <input type="checkbox" className="rounded border-border text-primary focus:ring-primary/30" />
-              Remember me
-            </label>
-            <a href="#" className="text-primary hover:text-primary-700 transition-colors">
-              Forgot password?
-            </a>
-          </div>
+          {error && (
+            <p className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg">{error}</p>
+          )}
 
           <Button type="submit" className="w-full">
             Sign in

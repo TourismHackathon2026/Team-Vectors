@@ -1,14 +1,17 @@
+import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, MapPin, Clock, DollarSign, Calendar, Star } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, DollarSign, Calendar, Star, Stamp, Check } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { StarRating } from '../components/ui/StarRating';
 import { heritageSites } from '../data/heritage';
+import { passportService } from '../services/passport';
 
 export default function HeritageDetails() {
   const { id } = useParams<{ id: string }>();
   const site = heritageSites.find((s) => s.id === id);
+  const [justCollected, setJustCollected] = useState(false);
 
   if (!site) {
     return (
@@ -24,6 +27,15 @@ export default function HeritageDetails() {
       </div>
     );
   }
+
+  const alreadyCollected = passportService.hasEntry(site.id);
+
+  const handleCollect = () => {
+    if (!alreadyCollected) {
+      passportService.addEntry(site.id, site.name);
+      setJustCollected(true);
+    }
+  };
 
   return (
     <div className="py-16 lg:py-20">
@@ -95,11 +107,18 @@ export default function HeritageDetails() {
             <p className="text-text-secondary leading-relaxed">{site.description}</p>
           </div>
 
-          <div className="mt-8">
-            <Button className="gap-2">
-              <MapPin className="w-4 h-4" />
-              Collect Stamp
-            </Button>
+          <div className="mt-8 flex items-center gap-4">
+            {alreadyCollected || justCollected ? (
+              <Button disabled className="gap-2 bg-green-600 hover:bg-green-600 cursor-default">
+                <Check className="w-4 h-4" />
+                Stamp Collected
+              </Button>
+            ) : (
+              <Button onClick={handleCollect} className="gap-2">
+                <Stamp className="w-4 h-4" />
+                Collect Stamp
+              </Button>
+            )}
           </div>
         </motion.div>
       </div>

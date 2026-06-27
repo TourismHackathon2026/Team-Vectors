@@ -1,0 +1,187 @@
+Nepali Sathi — Image Replacement Guide
+========================================
+
+This document lists every location in the codebase where placeholder
+gradients, empty image strings, or icon placeholders are used instead of
+real images. Replace these with actual photographs when ready.
+
+========================================
+1. FAVICON
+========================================
+
+File:          public/favicon.svg
+Current:       Simple MapPin SVG icon in brand green (#14532D)
+Replace with:  A proper brand favicon (logo mark or stylized "NS" monogram)
+
+========================================
+2. HERO BACKGROUND (Home Page)
+========================================
+
+File:          src/pages/Home.tsx
+Line:          14
+Current:       CSS gradient: bg-gradient-to-br from-green-950 via-green-900 to-amber-950
+               + radial-gradient overlays for depth
+Replace with:  A full-width, high-resolution photo of Kathmandu Valley or a
+               panoramic Nepal heritage landscape (e.g., Boudhanath Stupa
+               at sunrise, or a wide shot of the Himalayas).
+               Suggested size: 1920x1080px or larger, darken with overlay.
+
+========================================
+3. HERITAGE SITE CARD IMAGES (Home Page)
+========================================
+
+File:          src/pages/Home.tsx
+Lines:         92-97 (in HeritageCard component)
+Current:       CSS gradient: bg-gradient-to-br from-primary-900 to-primary-700
+               with a MapPin icon centered over it.
+               Tagged with:  <div className="relative h-52 ...">
+Replace with:  Real photo of each heritage site.
+               There are 6 cards on the home page (featuredSites slice).
+
+Data source:   src/data/heritage.ts
+Sites needing hero photos for cards:
+  - kathmandu-durbar-square   → Kathmandu Durbar Square
+  - swayambhunath             → Swayambhunath Stupa
+  - pashupatinath             → Pashupatinath Temple
+  - boudhanath                → Boudhanath Stupa
+  - bhaktapur-durbar-square   → Bhaktapur Durbar Square
+  - changu-narayan            → Changu Narayan Temple
+
+How to wire:   Set the `image` field on each HeritageSite in
+               src/data/heritage.ts, then render an <img> tag
+               with that URL inside the card's gradient container.
+
+========================================
+4. HERITAGE DETAILS HERO (Dynamic Page)
+========================================
+
+File:          src/pages/HeritageDetails.tsx
+Line:          56
+Current:       CSS gradient: bg-gradient-to-br from-primary-900 via-primary-800
+               to-amber-900 with a MapPin icon centered.
+Replace with:  A large hero photo of the specific heritage site.
+               Use the site.image field (loaded from data/heritage.ts).
+               Suggested size: 1200x600px.
+
+========================================
+5. EXPLORE PAGE CARD IMAGES
+========================================
+
+File:          src/pages/Explore.tsx
+Lines:         25-28 (in HeritageCard component)
+Current:       Same gradient + MapPin pattern as the home page cards.
+               Height: h-48
+Replace with:  Photo of each heritage site.
+               There are 10 cards on this page (all heritageSites).
+
+Additional sites needing photos:
+  - patan-durbar-square   → Patan Durbar Square
+  - lumbini               → Lumbini Sacred Garden
+  - chitwan               → Chitwan National Park
+  - sagarmatha            → Sagarmatha National Park
+
+========================================
+6. HERITAGE SITE DATA — image fields
+========================================
+
+File:          src/data/heritage.ts
+All 10 sites have:  image: ''  and  images: []
+Each site also has an `images` array for gallery support.
+
+Steps to add images per site:
+  1. Set the `image` field to a URL string (e.g., a Cloudinary/Unsplash URL)
+  2. Optionally populate `images[]` with gallery URLs
+  3. Update the card components to render <img> instead of the gradient
+  4. Update HeritageDetails hero to use the site.image
+
+========================================
+7. TESTIMONIAL AVATARS
+========================================
+
+File:          src/data/heritage.ts
+Lines:         275, 283, 291, 299 (avatar fields)
+All 4 testimonials have:  avatar: ''
+Replace with:  Profile photo URLs for each traveler.
+
+Testimonials:
+  - Priya Sharma      (Mumbai, India)
+  - James Mitchell    (Melbourne, Australia)
+  - Aiko Tanaka       (Tokyo, Japan)
+  - Rajesh Gurung     (Pokhara, Nepal)
+
+How to wire:   Update the TestimonialsSection in Home.tsx to render an
+               <img> tag with the avatar URL when available.
+
+========================================
+8. USER AVATAR
+========================================
+
+File:          src/services/passport.ts
+Line:          70 (User creation)
+               avatar: ''
+File:          src/pages/Profile.tsx
+Line:          17
+Current:       Shows first letter of user's name in a colored circle,
+               or a UserIcon fallback when not signed in.
+Replace with:  Actual avatar image uploaded by the user (requires an
+               avatar upload feature + storage, e.g., Supabase Storage).
+
+========================================
+9. PASSPORT ENTRY IMAGE
+========================================
+
+File:          src/services/passport.ts
+Line:          24 (PassportEntry creation)
+               image: ''
+Current:       Not rendered on the Passport or Stamps pages.
+Future use:    Could show a photo taken by the user at the site.
+
+========================================
+10. NO IMAGE FALLBACK — MapPin Icon Pattern
+========================================
+
+Throughout the codebase, there is a consistent pattern for image
+placeholders — a CSS gradient background with a centered MapPin icon:
+
+  <div className="relative h-XX overflow-hidden bg-gradient-to-br
+       from-primary-900 to-primary-700">
+    <div className="absolute inset-0 flex items-center justify-center">
+      <MapPin className="text-white/30" />
+    </div>
+  </div>
+
+This pattern appears in:
+  - src/pages/Home.tsx        (HeritageCard, line 92)
+  - src/pages/Explore.tsx     (HeritageCard, line 25)
+  - src/pages/HeritageDetails.tsx  (hero, line 56)
+
+When adding real images, replace the MapPin div with:
+  <img src={site.image} alt={site.name}
+       className="absolute inset-0 w-full h-full object-cover" />
+
+And remove the gradient class or layer it as a fallback.
+
+========================================
+IMAGE ASSET SUGGESTIONS
+========================================
+
+Recommended sizes:
+  - Hero background:   1920x1080px (16:9)
+  - Card thumbnails:   600x400px (3:2)
+  - Detail hero:       1200x600px (2:1)
+  - Avatar:            200x200px (1:1)
+  - Favicon:           32x32px SVG
+
+Where to host:
+  - /public/images/   (local, bundled with the app)
+  - Cloudinary         (cloud, with transformations)
+  - Supabase Storage   (cloud, best for user uploads)
+  - Unsplash           (free stock photos, good for placeholders)
+
+Recommended free heritage photos on Unsplash:
+  - Search "Kathmandu Nepal heritage"
+  - Search "Boudhanath stupa"
+  - Search "Pashupatinath temple"
+  - Search "Bhaktapur durbar square"
+  - Search "Mount Everest landscape"
+  - Search "Chitwan national park"
