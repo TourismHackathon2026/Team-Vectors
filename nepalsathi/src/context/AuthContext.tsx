@@ -103,32 +103,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (!data.user) {
       registrationInProgress.current = false;
-      return { success: false, error: 'Sign up failed. Please try again.' };
+      return { success: false, error: 'Registration failed. Please try again.' };
     }
 
     if (!data.session) {
       const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
       if (signInError) {
         registrationInProgress.current = false;
-        return { success: false, error: 'Account created. Please sign in.' };
+        return { success: false, error: 'Account created. Please check your email to verify, then sign in.' };
       }
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 300));
-
-    const { error: profileError } = await supabase.from('profiles').upsert({
-      id: data.user.id,
-      name,
-      email,
-      avatar: '',
-      level: 1,
-      xp: 0,
-      preferences: { language: 'English', notifications: true, darkMode: false },
-    });
-
-    if (profileError) {
-      registrationInProgress.current = false;
-      return { success: false, error: 'Failed to save profile. Please try signing in.' };
     }
 
     await fetchProfile(data.user.id);

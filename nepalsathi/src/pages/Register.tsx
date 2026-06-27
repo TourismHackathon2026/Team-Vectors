@@ -65,7 +65,12 @@ export default function Register() {
       navigate('/dashboard');
     } else {
       const errMsg = typeof result.error === 'string' ? result.error : 'Registration failed. Please try again.';
-      setGeneralError(errMsg);
+      if (result.error && result.error.includes('check your email')) {
+        addToast('success', 'Account created! Check your email to verify, then sign in.');
+        setGeneralError(errMsg);
+      } else {
+        setGeneralError(errMsg);
+      }
     }
   };
 
