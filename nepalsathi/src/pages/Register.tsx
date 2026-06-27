@@ -64,7 +64,8 @@ export default function Register() {
       addToast('success', 'Passport created! Welcome to Nepali Sathi.');
       navigate('/dashboard');
     } else {
-      setGeneralError(result.error || 'Registration failed. Please try again.');
+      const errMsg = typeof result.error === 'string' ? result.error : 'Registration failed. Please try again.';
+      setGeneralError(errMsg);
     }
   };
 

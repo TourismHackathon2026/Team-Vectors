@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
 import { supabase } from '../lib/supabase';
 import { storage } from '../services/storage';
 import type { User } from '../types';
@@ -18,6 +18,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const registrationInProgress = useRef(false);
 
   useEffect(() => {
     const initialize = async () => {
@@ -33,9 +34,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     initialize();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session?.user) {
+      if (session?.user && !registrationInProgress.current) {
         await fetchProfile(session.user.id);
-      } else {
+      } else if (!session?.user) {
         setUser(null);
       }
       setLoading(false);
@@ -87,6 +88,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const register = useCallback(async (name: string, email: string, password: string) => {
+    registrationInProgress.current = true;
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -94,45 +97,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     if (error) {
-      return { success: false, error: error.message };
+      registrationInProgress.current = false;
+      return { success: false, error: error.message || 'Registration failed.' };
     }
 
     if (!data.user) {
+      registrationInProgress.current = false;
       return { success: false, error: 'Sign up failed. Please try again.' };
-    }
-
-    try {
-      const { error: profileError } = await supabase.from('profiles').upsert({
-        id: data.user.id,
-        name,
-        email,
-        avatar: '',
-        level: 1,
-        xp: 0,
-        preferences: { language: 'English', notifications: true, darkMode: false },
-      });
-
-      if (profileError) {
-        const { data: existing } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('id', data.user.id)
-          .single();
-        if (!existing) {
-          return { success: false, error: 'Failed to create profile. Please try again.' };
-        }
-      }
-    } catch {
-      return { success: false, error: 'Failed to create profile. Please try again.' };
     }
 
     if (!data.session) {
       const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
       if (signInError) {
+        registrationInProgress.current = false;
         return { success: false, error: 'Account created. Please sign in.' };
       }
     }
 
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    const { error: profileError } = await supabase.from('profiles').upsert({
+      id: data.user.id,
+      name,
+      email,
+      avatar: '',
+      level: 1,
+      xp: 0,
+      preferences: { language: 'English', notifications: true, darkMode: false },
+    });
+
+    if (profileError) {
+      registrationInProgress.current = false;
+      return { success: false, error: 'Failed to save profile. Please try signing in.' };
+    }
+
+    await fetchProfile(data.user.id);
+    registrationInProgress.current = false;
     return { success: true };
   }, []);
 
