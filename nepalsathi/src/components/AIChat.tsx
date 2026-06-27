@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   MessageSquare, X, Send, Bot, User,
@@ -16,13 +16,30 @@ export function AIChat() {
   const [typing, setTyping] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
+  const addMessage = useCallback((role: 'user' | 'assistant', content: string) => {
+    setMessages((prev) => [...prev, { id: generateId(), role, content, timestamp: new Date().toISOString() }]);
+  }, []);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      setOpen(true);
+      if (detail?.site) {
+        addMessage('user', `Tell me more about ${detail.site}`);
+        setTyping(true);
+        setTimeout(() => {
+          addMessage('assistant', getAIResponse(`Tell me more about ${detail.site}`));
+          setTyping(false);
+        }, 1400);
+      }
+    };
+    window.addEventListener('opencode-ai-chat', handler);
+    return () => window.removeEventListener('opencode-ai-chat', handler);
+  }, [addMessage]);
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, typing]);
-
-  const addMessage = (role: 'user' | 'assistant', content: string) => {
-    setMessages((prev) => [...prev, { id: generateId(), role, content, timestamp: new Date().toISOString() }]);
-  };
 
   const handleSend = (text: string) => {
     if (!text.trim()) return;

@@ -17,6 +17,10 @@ export function AIStoryMode({ siteId, siteName }: AIStoryModeProps) {
 
   if (!story) return null;
 
+  const openAIChat = () => {
+    window.dispatchEvent(new CustomEvent('opencode-ai-chat', { detail: { site: siteName } }));
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -83,7 +87,7 @@ export function AIStoryMode({ siteId, siteName }: AIStoryModeProps) {
                   <>Read more <ChevronDown className="w-3.5 h-3.5" /></>
                 )}
               </Button>
-              <Button variant="outline" size="sm" className="gap-1.5">
+              <Button variant="outline" size="sm" className="gap-1.5" onClick={openAIChat}>
                 <MessageSquare className="w-3.5 h-3.5" />
                 Ask AI
               </Button>

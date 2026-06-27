@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import { supabase } from '../lib/supabase';
 import { storage } from '../services/storage';
 import { generateId } from '../utils/helpers';
 import { quests as initialQuests } from '../data/quests';
@@ -29,6 +30,7 @@ interface DataContextType {
   addActivity: (type: string, message: string) => void;
   toggleDarkMode: () => void;
   addXp: (amount: number) => void;
+  unlockAchievement: (id: string) => void;
   updatePreferences: (prefs: Partial<UserPreferences>) => void;
 }
 
@@ -60,19 +62,205 @@ const defaultItinerary: ItineraryItem[] = [
 const DataContext = createContext<DataContextType | null>(null);
 
 export function DataProvider({ children }: { children: ReactNode }) {
+  const [userId, setUserId] = useState<string | null>(null);
+
+  // Local fallback states
   const [savedPlaces, setSavedPlaces] = useState<string[]>(() => storage.get('saved-places', []));
   const [quests, setQuests] = useState<Quest[]>(() => storage.get('quests', initialQuests));
   const [passportStamps, setPassportStamps] = useState<PassportEntry[]>(() => storage.get('nepali-sathi-passport', []));
-  const [achievements] = useState<Achievement[]>(() => storage.get('achievements', defaultAchievements));
+  const [achievements, setAchievements] = useState<Achievement[]>(() => storage.get('achievements', defaultAchievements));
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>(() => storage.get('chat-history', []));
   const [itinerary, setItinerary] = useState<ItineraryItem[]>(() => storage.get('itinerary', defaultItinerary));
   const [memoryBook, setMemoryBook] = useState<MemoryEntry[]>(() => storage.get('memory-book', []));
   const [recentActivity, setRecentActivity] = useState<Activity[]>(() => storage.get('recent-activity', []));
+  const [conversationId, setConversationId] = useState<string | null>(null);
   const [darkMode, setDarkMode] = useState(() => storage.get('dark-mode', false));
   const [preferences, setPreferences] = useState<UserPreferences>(() => storage.get('preferences', defaultPreferences));
 
+  // Watch for auth state
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      const uid = session?.user?.id ?? null;
+      setUserId(uid);
+      if (uid) {
+        await Promise.all([
+          loadFavorites(uid),
+          loadPassportStamps(uid),
+          loadItinerary(uid),
+          loadMemoryBook(uid),
+          loadRecentActivity(uid),
+          loadPreferences(uid),
+          loadOrCreateConversation(uid),
+          loadAchievements(uid),
+        ]);
+      }
+    };
+    checkUser();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      const uid = session?.user?.id ?? null;
+      setUserId(uid);
+      if (uid) {
+        loadFavorites(uid);
+        loadPassportStamps(uid);
+        loadItinerary(uid);
+        loadMemoryBook(uid);
+        loadRecentActivity(uid);
+        loadPreferences(uid);
+        loadOrCreateConversation(uid);
+        loadAchievements(uid);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const loadFavorites = async (uid: string) => {
+    const { data } = await supabase.from('favorites').select('site_id').eq('user_id', uid);
+    if (data) setSavedPlaces(data.map((f) => f.site_id));
+  };
+
+  const loadPassportStamps = async (uid: string) => {
+    const { data } = await supabase
+      .from('passport_stamps')
+      .select('*')
+      .eq('user_id', uid)
+      .order('visited_at', { ascending: false });
+    if (data) {
+      setPassportStamps(data.map((s: any) => ({
+        id: s.id,
+        siteId: s.site_id,
+        siteName: s.site_name,
+        visitedAt: s.visited_at,
+        note: s.note || '',
+        image: s.image || '',
+      })));
+    }
+  };
+
+  const loadItinerary = async (uid: string) => {
+    const { data } = await supabase
+      .from('itinerary_items')
+      .select('*')
+      .eq('user_id', uid)
+      .order('item_order', { ascending: true });
+    if (data) {
+      setItinerary(data.map((i: any) => ({
+        id: i.id,
+        timeSlot: i.time_slot,
+        title: i.title,
+        description: i.description || '',
+        order: i.item_order || 0,
+      })));
+    }
+  };
+
+  const loadMemoryBook = async (uid: string) => {
+    const { data } = await supabase
+      .from('memory_entries')
+      .select('*')
+      .eq('user_id', uid)
+      .order('created_at', { ascending: false });
+    if (data) {
+      setMemoryBook(data.map((m: any) => ({
+        id: m.id,
+        placeId: m.place_id || m.place_name.toLowerCase().replace(/\s+/g, '-'),
+        placeName: m.place_name,
+        visitDate: m.visit_date,
+        notes: m.notes || '',
+        photos: m.photos || [],
+      })));
+    }
+  };
+
+  const loadRecentActivity = async (uid: string) => {
+    const { data } = await supabase
+      .from('recent_activities')
+      .select('*')
+      .eq('user_id', uid)
+      .order('created_at', { ascending: false })
+      .limit(20);
+    if (data) {
+      setRecentActivity(data.map((a: any) => ({
+        id: a.id,
+        type: a.type,
+        message: a.message,
+        timestamp: a.created_at,
+      })));
+    }
+  };
+
+  const loadPreferences = async (uid: string) => {
+    const { data } = await supabase.from('profiles').select('preferences').eq('id', uid).single();
+    if (data?.preferences) {
+      const prefs = data.preferences as UserPreferences;
+      setPreferences(prefs);
+      if (prefs.darkMode !== undefined) setDarkMode(prefs.darkMode);
+    }
+  };
+
+  const loadOrCreateConversation = async (uid: string) => {
+    const { data: existing } = await supabase
+      .from('ai_conversations')
+      .select('id')
+      .eq('user_id', uid)
+      .order('updated_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    let convId: string | null = null;
+
+    if (existing) {
+      convId = existing.id;
+      const { data: messages } = await supabase
+        .from('ai_messages')
+        .select('*')
+        .eq('conversation_id', convId)
+        .order('created_at', { ascending: true });
+      if (messages) {
+        setChatHistory(messages.map((m: any) => ({
+          id: m.id,
+          role: m.role,
+          content: m.content,
+          timestamp: m.created_at,
+        })));
+      }
+    } else {
+      const { data: newConv } = await supabase
+        .from('ai_conversations')
+        .insert({ user_id: uid, title: 'Travel Chat' })
+        .select('id')
+        .single();
+      if (newConv) convId = newConv.id;
+    }
+
+    setConversationId(convId);
+  };
+
+  const loadAchievements = async (uid: string) => {
+    const { data } = await supabase
+      .from('user_achievements')
+      .select('achievement_id, unlocked_at')
+      .eq('user_id', uid);
+
+    if (data) {
+      const unlockedMap = new Map(data.map((a: any) => [a.achievement_id, a.unlocked_at]));
+      setAchievements(
+        defaultAchievements.map((a) =>
+          unlockedMap.has(a.id)
+            ? { ...a, unlocked: true, unlockedAt: unlockedMap.get(a.id) }
+            : a
+        )
+      );
+    }
+  };
+
+  // Persist local state
   useEffect(() => { storage.set('saved-places', savedPlaces); }, [savedPlaces]);
   useEffect(() => { storage.set('quests', quests); }, [quests]);
+  useEffect(() => { storage.set('nepali-sathi-passport', passportStamps); }, [passportStamps]);
+  useEffect(() => { storage.set('achievements', achievements); }, [achievements]);
   useEffect(() => { storage.set('chat-history', chatHistory); }, [chatHistory]);
   useEffect(() => { storage.set('itinerary', itinerary); }, [itinerary]);
   useEffect(() => { storage.set('memory-book', memoryBook); }, [memoryBook]);
@@ -88,59 +276,152 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }
   }, [darkMode]);
 
-  const toggleSavePlace = useCallback((placeId: string) => {
-    setSavedPlaces((prev) =>
-      prev.includes(placeId) ? prev.filter((id) => id !== placeId) : [...prev, placeId],
-    );
-  }, []);
+  const toggleSavePlace = useCallback(async (placeId: string) => {
+    setSavedPlaces((prev) => {
+      const exists = prev.includes(placeId);
+      if (exists) {
+        if (userId) supabase.from('favorites').delete().eq('user_id', userId).eq('site_id', placeId);
+        return prev.filter((id) => id !== placeId);
+      }
+      if (userId) supabase.from('favorites').insert({ user_id: userId, site_id: placeId });
+      return [...prev, placeId];
+    });
+  }, [userId]);
 
   const isSaved = useCallback((placeId: string) => savedPlaces.includes(placeId), [savedPlaces]);
 
-  const completeQuest = useCallback((questId: string) => {
+  const completeQuest = useCallback(async (questId: string) => {
     setQuests((prev) => prev.map((q) => q.id === questId ? { ...q, completed: true } : q));
-  }, []);
+    if (userId) {
+      await supabase.from('completed_quests').upsert(
+        { user_id: userId, quest_id: questId },
+        { onConflict: 'user_id, quest_id' },
+      );
+    }
+  }, [userId]);
 
-  const addStamp = useCallback((placeId: string, placeName: string) => {
+  const addStamp = useCallback(async (placeId: string, placeName: string) => {
+    const newStamp: PassportEntry = {
+      id: generateId(),
+      siteId: placeId,
+      siteName: placeName,
+      visitedAt: new Date().toISOString(),
+      note: '',
+      image: '',
+    };
     setPassportStamps((prev) => {
       if (prev.some((s) => s.siteId === placeId)) return prev;
-      return [...prev, { id: generateId(), siteId: placeId, siteName: placeName, visitedAt: new Date().toISOString(), note: '', image: '' }];
+      if (userId) {
+        supabase.from('passport_stamps').insert({
+          user_id: userId,
+          site_id: placeId,
+          site_name: placeName,
+        });
+      }
+      return [...prev, newStamp];
     });
-  }, []);
+  }, [userId]);
 
   const addChatMessage = useCallback((msg: ChatMessage) => {
     setChatHistory((prev) => [...prev, msg]);
-  }, []);
+    if (userId && conversationId) {
+      supabase.from('ai_messages').insert({
+        conversation_id: conversationId,
+        role: msg.role,
+        content: msg.content,
+      });
+    }
+  }, [userId, conversationId]);
 
   const clearChat = useCallback(() => {
     setChatHistory([]);
-  }, []);
+    if (userId && conversationId) {
+      supabase.from('ai_messages').delete().eq('conversation_id', conversationId);
+      supabase.from('ai_conversations').delete().eq('id', conversationId);
+      setConversationId(null);
+    }
+  }, [userId, conversationId]);
 
-  const updateItinerary = useCallback((items: ItineraryItem[]) => {
+  const updateItinerary = useCallback(async (items: ItineraryItem[]) => {
     setItinerary(items);
-  }, []);
+    if (userId) {
+      await supabase.from('itinerary_items').delete().eq('user_id', userId);
+      if (items.length > 0) {
+        await supabase.from('itinerary_items').insert(
+          items.map((item, idx) => ({
+            user_id: userId,
+            time_slot: item.timeSlot,
+            title: item.title,
+            description: item.description,
+            item_order: idx,
+          }))
+        );
+      }
+    }
+  }, [userId]);
 
-  const addMemoryEntry = useCallback((entry: Omit<MemoryEntry, 'id'>) => {
-    setMemoryBook((prev) => [{ id: generateId(), ...entry }, ...prev]);
-  }, []);
+  const addMemoryEntry = useCallback(async (entry: Omit<MemoryEntry, 'id'>) => {
+    const newEntry: MemoryEntry = { id: generateId(), ...entry };
+    setMemoryBook((prev) => [newEntry, ...prev]);
+    if (userId) {
+      await supabase.from('memory_entries').insert({
+        user_id: userId,
+        place_name: entry.placeName,
+        place_id: entry.placeId,
+        visit_date: entry.visitDate.split('T')[0],
+        notes: entry.notes,
+        photos: entry.photos,
+      });
+    }
+  }, [userId]);
 
-  const addActivity = useCallback((type: string, message: string) => {
-    setRecentActivity((prev) => {
-      const activity: Activity = { id: generateId(), type, message, timestamp: new Date().toISOString() };
-      return [activity, ...prev].slice(0, 20);
+  const addActivity = useCallback(async (type: string, message: string) => {
+    const activity: Activity = {
+      id: generateId(),
+      type,
+      message,
+      timestamp: new Date().toISOString(),
+    };
+    setRecentActivity((prev) => [activity, ...prev].slice(0, 20));
+    if (userId) {
+      await supabase.from('recent_activities').insert({
+        user_id: userId,
+        type,
+        message,
+      });
+    }
+  }, [userId]);
+
+  const updatePreferences = useCallback(async (prefs: Partial<UserPreferences>) => {
+    setPreferences((prev) => {
+      const next = { ...prev, ...prefs };
+      if (userId) {
+        supabase.from('profiles').update({ preferences: next }).eq('id', userId);
+      }
+      return next;
     });
-  }, []);
+  }, [userId]);
 
   const toggleDarkMode = useCallback(() => {
     setDarkMode((prev) => !prev);
-  }, []);
+    updatePreferences({ darkMode: !darkMode });
+  }, [darkMode, updatePreferences]);
 
   const addXp = useCallback((_amount: number) => {
-    // XP is stored on the user object in auth service
+    // XP is updated via AuthContext.updateProfile now
   }, []);
 
-  const updatePreferences = useCallback((prefs: Partial<UserPreferences>) => {
-    setPreferences((prev) => ({ ...prev, ...prefs }));
-  }, []);
+  const unlockAchievement = useCallback((id: string) => {
+    setAchievements((prev) => prev.map((a) =>
+      a.id === id && !a.unlocked ? { ...a, unlocked: true, unlockedAt: new Date().toISOString() } : a,
+    ));
+    if (userId) {
+      supabase.from('user_achievements').upsert(
+        { user_id: userId, achievement_id: id },
+        { onConflict: 'user_id, achievement_id' },
+      );
+    }
+  }, [userId]);
 
   return (
     <DataContext.Provider
@@ -149,7 +430,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         itinerary, memoryBook, recentActivity, darkMode, preferences,
         toggleSavePlace, isSaved, completeQuest, addStamp, addChatMessage,
         clearChat, updateItinerary, addMemoryEntry, addActivity,
-        toggleDarkMode, addXp, updatePreferences,
+        toggleDarkMode, addXp, unlockAchievement, updatePreferences,
       }}
     >
       {children}

@@ -7,6 +7,11 @@ import { Input } from '../components/ui/Input';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 
+interface FieldErrors {
+  email?: string;
+  password?: string;
+}
+
 export default function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -14,17 +19,37 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+
+  const validateForm = (): boolean => {
+    const errors: FieldErrors = {};
+
+    if (!form.email.trim()) {
+      errors.email = 'Email is required.';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      errors.email = 'Please enter a valid email address.';
+    }
+
+    if (!form.password) {
+      errors.password = 'Password is required.';
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateForm()) return;
+
     setLoading(true);
-    const success = login(form.email, form.password);
+    const result = await login(form.email.trim(), form.password);
     setLoading(false);
-    if (success) {
+    if (result.success) {
       addToast('success', 'Welcome back!');
       navigate('/dashboard');
     } else {
-      addToast('error', 'No account found with this email.');
+      addToast('error', result.error || 'Invalid email or password.');
     }
   };
 
@@ -47,14 +72,18 @@ export default function Login() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           <Input
             id="email"
             label="Email"
             type="email"
             placeholder="you@example.com"
             value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
+            onChange={(e) => {
+              setForm({ ...form, email: e.target.value });
+              if (fieldErrors.email) setFieldErrors((prev) => ({ ...prev, email: undefined }));
+            }}
+            error={fieldErrors.email}
             required
           />
 
@@ -65,7 +94,11 @@ export default function Login() {
               type={showPassword ? 'text' : 'password'}
               placeholder="Enter your password"
               value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              onChange={(e) => {
+                setForm({ ...form, password: e.target.value });
+                if (fieldErrors.password) setFieldErrors((prev) => ({ ...prev, password: undefined }));
+              }}
+              error={fieldErrors.password}
               required
             />
             <button
@@ -79,7 +112,7 @@ export default function Login() {
           </div>
 
           <Button type="submit" className="w-full" loading={loading}>
-            Sign in
+            {loading ? 'Signing in...' : 'Sign in'}
           </Button>
         </form>
 

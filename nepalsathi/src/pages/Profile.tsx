@@ -1,14 +1,31 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { User as UserIcon, Mail, Calendar, MapPin, LogOut } from 'lucide-react';
+import { User as UserIcon, Mail, Calendar, MapPin, LogOut, Settings } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
+import { Modal } from '../components/ui/Modal';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 import { formatDate, getLevelTitle } from '../utils/helpers';
 
 export default function Profile() {
-  const { user, logout } = useAuth();
+  const { user, logout, updateProfile } = useAuth();
   const { passportStamps } = useData();
+  const [editOpen, setEditOpen] = useState(false);
+  const [editForm, setEditForm] = useState({ name: '', email: '' });
+
+  const openEdit = () => {
+    if (!user) return;
+    setEditForm({ name: user.name, email: user.email });
+    setEditOpen(true);
+  };
+
+  const saveEdit = () => {
+    if (!editForm.name.trim()) return;
+    updateProfile({ name: editForm.name.trim(), email: editForm.email.trim() });
+    setEditOpen(false);
+  };
 
   return (
     <div className="py-16 lg:py-20">
@@ -67,7 +84,10 @@ export default function Profile() {
           <div className="mt-6 flex flex-col items-center gap-3">
             {user ? (
               <>
-                <Button variant="outline" disabled>Edit Profile</Button>
+                <Button variant="outline" onClick={openEdit} className="gap-2">
+                  <Settings className="w-4 h-4" />
+                  Edit Profile
+                </Button>
                 <Button variant="ghost" size="sm" onClick={logout} className="gap-2 text-red-500 hover:text-red-600">
                   <LogOut className="w-4 h-4" />
                   Sign Out
@@ -80,6 +100,32 @@ export default function Profile() {
             )}
           </div>
         </motion.div>
+
+        <Modal open={editOpen} onClose={() => setEditOpen(false)} title="Edit Profile">
+          <div className="space-y-4">
+            <Input
+              id="edit-name"
+              label="Full Name"
+              value={editForm.name}
+              onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+              required
+            />
+            <Input
+              id="edit-email"
+              label="Email"
+              type="email"
+              value={editForm.email}
+              onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+              required
+            />
+            <div className="flex gap-3 pt-2">
+              <Button variant="ghost" className="flex-1" onClick={() => setEditOpen(false)}>Cancel</Button>
+              <Button className="flex-1" onClick={saveEdit} disabled={!editForm.name.trim()}>
+                Save Changes
+              </Button>
+            </div>
+          </div>
+        </Modal>
       </div>
     </div>
   );

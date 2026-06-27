@@ -7,11 +7,14 @@ import { Badge } from '../components/ui/Badge';
 import { StarRating } from '../components/ui/StarRating';
 import { AIStoryMode } from '../components/AIStoryMode';
 import { heritageSites } from '../data/heritage';
-import { passportService } from '../services/passport';
+import { useData } from '../context/DataContext';
+import { useToast } from '../context/ToastContext';
 
 export default function HeritageDetails() {
   const { id } = useParams<{ id: string }>();
   const site = heritageSites.find((s) => s.id === id);
+  const { passportStamps, addStamp, addXp, addActivity, unlockAchievement } = useData();
+  const { addToast } = useToast();
   const [justCollected, setJustCollected] = useState(false);
 
   if (!site) {
@@ -29,13 +32,19 @@ export default function HeritageDetails() {
     );
   }
 
-  const alreadyCollected = passportService.hasEntry(site.id);
+  const alreadyCollected = passportStamps.some((s) => s.siteId === site.id);
 
   const handleCollect = () => {
-    if (!alreadyCollected) {
-      passportService.addEntry(site.id, site.name);
-      setJustCollected(true);
+    if (alreadyCollected) return;
+    addStamp(site.id, site.name);
+    addXp(50);
+    addActivity('stamp', `Collected stamp at ${site.name}`);
+    addToast('success', `Stamp collected at ${site.name}! +50 XP`);
+    if (passportStamps.length + 1 >= 10) {
+      unlockAchievement('ach-stamps');
+      addToast('success', 'Achievement unlocked: Stamp Collector!');
     }
+    setJustCollected(true);
   };
 
   return (

@@ -68,7 +68,7 @@ function HeroSection() {
               <Button
                 variant="outline"
                 size="lg"
-                className="border-white/20 text-white hover:bg-white/10 hover:text-white"
+                className="bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white"
               >
                 Create Passport
               </Button>

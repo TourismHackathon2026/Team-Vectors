@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, MapPin } from 'lucide-react';
+import { Menu, X, MapPin, LayoutDashboard, User } from 'lucide-react';
 import { cn } from '../utils/helpers';
 import { Button } from './ui/Button';
+import { useAuth } from '../context/AuthContext';
 
 const navLinks = [
   { label: 'Home', path: '/' },
@@ -19,6 +20,7 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { pathname } = useLocation();
+  const { user } = useAuth();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -73,16 +75,35 @@ export function Navbar() {
           </div>
 
           <div className="hidden md:flex items-center gap-3">
-            <Link to="/login">
-              <Button variant="ghost" size="sm">
-                Log in
-              </Button>
-            </Link>
-            <Link to="/register">
-              <Button variant="primary" size="sm">
-                Sign up
-              </Button>
-            </Link>
+            {user ? (
+              <>
+                <Link to="/dashboard">
+                  <Button variant="ghost" size="sm" className="gap-1.5">
+                    <LayoutDashboard className="w-4 h-4" />
+                    Dashboard
+                  </Button>
+                </Link>
+                <Link to="/profile">
+                  <Button variant="primary" size="sm" className="gap-1.5">
+                    <User className="w-4 h-4" />
+                    {user.name.split(' ')[0]}
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link to="/login">
+                  <Button variant="ghost" size="sm">
+                    Log in
+                  </Button>
+                </Link>
+                <Link to="/register">
+                  <Button variant="primary" size="sm">
+                    Sign up
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
 
           <button
@@ -124,16 +145,35 @@ export function Navbar() {
                 </Link>
               ))}
               <hr className="my-3 border-border" />
-              <Link to="/login" className="block">
-                <Button variant="ghost" size="sm" className="w-full justify-start">
-                  Log in
-                </Button>
-              </Link>
-              <Link to="/register" className="block">
-                <Button variant="primary" size="sm" className="w-full">
-                  Sign up
-                </Button>
-              </Link>
+              {user ? (
+                <>
+                  <Link to="/dashboard" className="block">
+                    <Button variant="ghost" size="sm" className="w-full justify-start gap-2">
+                      <LayoutDashboard className="w-4 h-4" />
+                      Dashboard
+                    </Button>
+                  </Link>
+                  <Link to="/profile" className="block">
+                    <Button variant="primary" size="sm" className="w-full justify-start gap-2">
+                      <User className="w-4 h-4" />
+                      {user.name}
+                    </Button>
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link to="/login" className="block">
+                    <Button variant="ghost" size="sm" className="w-full justify-start">
+                      Log in
+                    </Button>
+                  </Link>
+                  <Link to="/register" className="block">
+                    <Button variant="primary" size="sm" className="w-full">
+                      Sign up
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </motion.div>
         )}

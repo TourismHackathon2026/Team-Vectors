@@ -1,21 +1,15 @@
-import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { MapPin, Calendar } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { EmptyState } from '../components/ui/EmptyState';
-import { passportService } from '../services/passport';
+import { useData } from '../context/DataContext';
 import { formatDate } from '../utils/helpers';
-import type { PassportEntry } from '../types';
 
 export default function Passport() {
+  const { passportStamps } = useData();
   const navigate = useNavigate();
-  const [entries, setEntries] = useState<PassportEntry[]>([]);
-
-  useEffect(() => {
-    setEntries(passportService.getEntries());
-  }, []);
 
   return (
     <div className="py-16 lg:py-20">
@@ -33,13 +27,13 @@ export default function Passport() {
           </h1>
           <p className="mt-2 text-text-secondary">
             Every heritage site you visit adds a stamp to your digital passport.
-            {entries.length > 0 && (
-              <span className="font-medium text-primary"> {entries.length} site{entries.length !== 1 ? 's' : ''} collected.</span>
+            {passportStamps.length > 0 && (
+              <span className="font-medium text-primary"> {passportStamps.length} site{passportStamps.length !== 1 ? 's' : ''} collected.</span>
             )}
           </p>
         </motion.div>
 
-        {entries.length === 0 ? (
+        {passportStamps.length === 0 ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -59,7 +53,7 @@ export default function Passport() {
           </motion.div>
         ) : (
           <div className="mt-8 space-y-3">
-            {entries.map((entry, i) => (
+            {passportStamps.map((entry, i) => (
               <motion.div
                 key={entry.id}
                 initial={{ opacity: 0, y: 16 }}

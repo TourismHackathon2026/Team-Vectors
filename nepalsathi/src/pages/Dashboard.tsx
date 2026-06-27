@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { MapPin, Stamp, Route, TrendingUp, Compass, Bot, BookOpen, Phone, Trophy } from 'lucide-react';
@@ -6,7 +5,6 @@ import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
-import { passportService } from '../services/passport';
 import { getLevelTitle, calculateLevel, getTimeAgo } from '../utils/helpers';
 
 const quickActions = [
@@ -21,17 +19,12 @@ const quickActions = [
 export default function Dashboard() {
   const { user } = useAuth();
   const { recentActivity, passportStamps } = useData();
-  const [entryCount, setEntryCount] = useState(0);
-
-  useEffect(() => {
-    setEntryCount(passportService.getEntryCount());
-  }, [passportStamps]);
 
   const levelInfo = user ? calculateLevel(user.xp) : { level: 1, currentXp: 0, nextLevelXp: 101 };
 
   const stats = [
-    { label: 'Sites Visited', value: String(entryCount), icon: MapPin },
-    { label: 'Stamps Collected', value: String(entryCount), icon: Stamp },
+    { label: 'Sites Visited', value: String(passportStamps.length), icon: MapPin },
+    { label: 'Stamps Collected', value: String(passportStamps.length), icon: Stamp },
     { label: 'Routes Planned', value: '3', icon: Route },
     { label: 'Days Active', value: user ? '1' : '0', icon: TrendingUp },
   ];

@@ -1,20 +1,14 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { Stamp, Calendar } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { EmptyState } from '../components/ui/EmptyState';
-import { passportService } from '../services/passport';
+import { useData } from '../context/DataContext';
 import { formatDate } from '../utils/helpers';
-import type { PassportEntry } from '../types';
 
 export default function Stamps() {
-  const [entries, setEntries] = useState<PassportEntry[]>([]);
-
-  useEffect(() => {
-    setEntries(passportService.getEntries());
-  }, []);
+  const { passportStamps } = useData();
 
   return (
     <div className="py-16 lg:py-20">
@@ -32,13 +26,13 @@ export default function Stamps() {
           </h1>
           <p className="mt-2 text-text-secondary">
             Every heritage site you visit rewards you with a unique stamp.
-            {entries.length > 0 && (
-              <span className="font-medium text-secondary"> {entries.length} stamp{entries.length !== 1 ? 's' : ''} collected.</span>
+            {passportStamps.length > 0 && (
+              <span className="font-medium text-secondary"> {passportStamps.length} stamp{passportStamps.length !== 1 ? 's' : ''} collected.</span>
             )}
           </p>
         </motion.div>
 
-        {entries.length === 0 ? (
+        {passportStamps.length === 0 ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -54,7 +48,7 @@ export default function Stamps() {
           </motion.div>
         ) : (
           <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {entries.map((entry, i) => (
+            {passportStamps.map((entry, i) => (
               <motion.div
                 key={entry.id}
                 initial={{ opacity: 0, scale: 0.95 }}
