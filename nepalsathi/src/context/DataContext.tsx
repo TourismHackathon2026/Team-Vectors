@@ -1,11 +1,13 @@
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
 import { supabase } from '../lib/supabase';
 import { storage } from '../services/storage';
 import { generateId } from '../utils/helpers';
 import { quests as initialQuests } from '../data/quests';
+import { getStoryTemplate } from '../data/story-templates';
+import { aiService } from '../services/aiService';
 import type {
   Quest, Achievement, ChatMessage, ItineraryItem,
-  MemoryEntry, Activity, UserPreferences, PassportEntry,
+  MemoryEntry, Activity, UserPreferences, PassportEntry, StoryChapter,
 } from '../types';
 
 interface DataContextType {
@@ -17,11 +19,13 @@ interface DataContextType {
   itinerary: ItineraryItem[];
   memoryBook: MemoryEntry[];
   recentActivity: Activity[];
+  stories: StoryChapter[];
   darkMode: boolean;
   preferences: UserPreferences;
   toggleSavePlace: (placeId: string) => void;
   isSaved: (placeId: string) => boolean;
   completeQuest: (questId: string) => void;
+  generateStoryChapter: (questId: string, questTitle: string, questCategory: string) => void;
   addStamp: (placeId: string, placeName: string) => void;
   addChatMessage: (msg: ChatMessage) => void;
   clearChat: () => void;
@@ -73,9 +77,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [itinerary, setItinerary] = useState<ItineraryItem[]>(() => storage.get('itinerary', defaultItinerary));
   const [memoryBook, setMemoryBook] = useState<MemoryEntry[]>(() => storage.get('memory-book', []));
   const [recentActivity, setRecentActivity] = useState<Activity[]>(() => storage.get('recent-activity', []));
+  const [stories, setStories] = useState<StoryChapter[]>(() => storage.get('nepali-sathi-stories', []));
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [darkMode, setDarkMode] = useState(() => storage.get('dark-mode', false));
   const [preferences, setPreferences] = useState<UserPreferences>(() => storage.get('preferences', defaultPreferences));
+
+  const questsRef = useRef(quests);
+  questsRef.current = quests;
 
   // Watch for auth state
   useEffect(() => {
@@ -259,6 +267,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Persist local state
   useEffect(() => { storage.set('saved-places', savedPlaces); }, [savedPlaces]);
   useEffect(() => { storage.set('quests', quests); }, [quests]);
+  useEffect(() => { storage.set('nepali-sathi-stories', stories); }, [stories]);
   useEffect(() => { storage.set('nepali-sathi-passport', passportStamps); }, [passportStamps]);
   useEffect(() => { storage.set('achievements', achievements); }, [achievements]);
   useEffect(() => { storage.set('chat-history', chatHistory); }, [chatHistory]);
@@ -290,7 +299,28 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const isSaved = useCallback((placeId: string) => savedPlaces.includes(placeId), [savedPlaces]);
 
+  const generateStoryChapter = useCallback(async (questId: string, questTitle: string, questCategory: string) => {
+    const alreadyExists = stories.some((s) => s.questId === questId);
+    if (alreadyExists) return;
+
+    const template = getStoryTemplate(questId, questCategory);
+    const aiNarrative = await aiService.generateQuestNarrative(questTitle, template, questCategory);
+    const narrative = aiNarrative || template;
+
+    const newChapter: StoryChapter = {
+      id: generateId(),
+      questId,
+      questTitle,
+      questCategory: questCategory as any,
+      order: stories.length + 1,
+      narrative,
+      completedAt: new Date().toISOString(),
+    };
+    setStories((prev) => [...prev, newChapter]);
+  }, [stories]);
+
   const completeQuest = useCallback(async (questId: string) => {
+    const quest = questsRef.current.find((q) => q.id === questId);
     setQuests((prev) => prev.map((q) => q.id === questId ? { ...q, completed: true } : q));
     if (userId) {
       await supabase.from('completed_quests').upsert(
@@ -298,7 +328,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
         { onConflict: 'user_id, quest_id' },
       );
     }
-  }, [userId]);
+    if (quest && !quest.completed) {
+      generateStoryChapter(questId, quest.title, quest.category);
+    }
+  }, [userId, generateStoryChapter]);
 
   const addStamp = useCallback(async (placeId: string, placeName: string) => {
     const newStamp: PassportEntry = {
@@ -427,8 +460,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
     <DataContext.Provider
       value={{
         savedPlaces, quests, passportStamps, achievements, chatHistory,
-        itinerary, memoryBook, recentActivity, darkMode, preferences,
-        toggleSavePlace, isSaved, completeQuest, addStamp, addChatMessage,
+        itinerary, memoryBook, recentActivity, stories, darkMode, preferences,
+        toggleSavePlace, isSaved, completeQuest, generateStoryChapter, addStamp, addChatMessage,
         clearChat, updateItinerary, addMemoryEntry, addActivity,
         toggleDarkMode, addXp, unlockAchievement, updatePreferences,
       }}

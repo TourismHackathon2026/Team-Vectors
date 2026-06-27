@@ -129,6 +129,34 @@ export const aiService = {
       return mockResponse(lastUserMsg);
     }
   },
+
+  async generateQuestNarrative(questTitle: string, questDescription: string, category: string): Promise<string | null> {
+    const apiKey = getApiKey();
+    if (!apiKey) return null;
+
+    try {
+      const prompt = `Write a single atmospheric paragraph (2-3 sentences) inspired by completing this quest in Nepal. Write in present tense, using sensory details, as if the reader just accomplished this.
+
+Quest: "${questTitle}"
+Description: "${questDescription}"
+Category: ${category}
+
+Make it vivid, warm, and travel-journal like. Do not use bullet points. Just one paragraph.`;
+      const res = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.8, maxOutputTokens: 200 },
+        }),
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data?.candidates?.[0]?.content?.parts?.[0]?.text || null;
+    } catch {
+      return null;
+    }
+  },
 };
 
 function isUnrelatedTopic(msg: string): boolean {

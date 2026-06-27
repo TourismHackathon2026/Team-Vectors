@@ -149,6 +149,16 @@ export interface Activity {
   timestamp: string;
 }
 
+export interface StoryChapter {
+  id: string;
+  questId: string;
+  questTitle: string;
+  questCategory: PlaceCategory;
+  order: number;
+  narrative: string;
+  completedAt: string;
+}
+
 export interface UserPreferences {
   language: 'English' | 'Nepali' | 'Hindi';
   notifications: boolean;

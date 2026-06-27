@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
-import { Trophy, CheckCircle, Circle, Sparkles, UtensilsCrossed, Landmark, Hand, TreePine, Music, Coffee, ShoppingBag, Compass, Lock, Key, Shield } from 'lucide-react';
+import { Trophy, CheckCircle, Circle, Sparkles, UtensilsCrossed, Landmark, Hand, TreePine, Music, Coffee, ShoppingBag, Compass, Lock, Key, Shield, BookOpen, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
@@ -24,7 +25,7 @@ const categories = ['All', ...new Set(questData.map((q) => q.category))];
 const secretQuestIds = new Set(['quest-21', 'quest-22', 'quest-23']);
 
 export default function Quests() {
-  const { quests, completeQuest, addActivity, unlockAchievement } = useData();
+  const { quests, stories, completeQuest, addActivity, unlockAchievement } = useData();
   const { user, updateProfile } = useAuth();
   const [activeCategory, setActiveCategory] = useState('All');
   const [showCompleted, setShowCompleted] = useState(false);
@@ -92,6 +93,27 @@ export default function Quests() {
             <span>{completedCount} / {questData.length} completed</span>
           </div>
         </motion.div>
+
+        {stories.length > 0 && (
+          <Link to="/story">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 p-4 rounded-xl bg-accent/5 border border-accent/15 hover:bg-accent/10 transition-colors cursor-pointer group"
+            >
+              <div className="flex items-center gap-3">
+                <BookOpen className="w-5 h-5 text-accent shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-text-primary">Your Story</p>
+                  <p className="text-xs text-text-secondary truncate">
+                    {stories.length} chapter{stories.length !== 1 ? 's' : ''} written &middot; Latest: {stories[stories.length - 1]?.questTitle}
+                  </p>
+                </div>
+                <ArrowRight className="w-4 h-4 text-text-muted group-hover:text-accent transition-colors shrink-0" />
+              </div>
+            </motion.div>
+          </Link>
+        )}
 
         <div className="flex flex-wrap items-center gap-3 mb-6">
           <div className="flex flex-wrap gap-1.5">

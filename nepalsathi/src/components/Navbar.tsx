@@ -12,6 +12,7 @@ const navLinks = [
   { label: 'Map', path: '/explore-map' },
   { label: 'Passport', path: '/passport' },
   { label: 'Quests', path: '/quests' },
+  { label: 'Story', path: '/story' },
   { label: 'About', path: '/about' },
   { label: 'Contact', path: '/contact' },
 ];
