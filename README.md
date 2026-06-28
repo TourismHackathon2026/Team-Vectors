@@ -1,6 +1,6 @@
 # NepaliSathi — Gamified Tourism Discovery for Nepal
 
-Web app that turns exploring Nepal's heritage sites into an interactive quest with stamps, XP, leaderboards, and AI-powered storytelling and help tourist to explore nepal as a local.
+Web app that turns exploring Nepal's heritage sites into an interactive quest with stamps, XP, leaderboards, and AI-powered storytelling and help tourist to explore Nepal as a local.
 
 ## Tech Stack
 
