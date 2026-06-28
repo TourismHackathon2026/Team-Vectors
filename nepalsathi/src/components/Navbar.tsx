@@ -5,16 +5,19 @@ import { Menu, X, MapPin, LayoutDashboard, User } from 'lucide-react';
 import { cn } from '../utils/helpers';
 import { Button } from './ui/Button';
 import { useAuth } from '../context/AuthContext';
+import { LanguageSwitcher } from './LanguageSwitcher';
+import { t } from '../lib/i18n';
 
 const navLinks = [
-  { label: 'Home', path: '/' },
-  { label: 'Explore', path: '/explore' },
-  { label: 'Map', path: '/explore-map' },
-  { label: 'Passport', path: '/passport' },
-  { label: 'Quests', path: '/quests' },
-  { label: 'Story', path: '/story' },
-  { label: 'About', path: '/about' },
-  { label: 'Contact', path: '/contact' },
+  { labelKey: 'nav.home', path: '/' },
+  { labelKey: 'nav.explore', path: '/explore' },
+  { labelKey: 'nav.map', path: '/explore-map' },
+  { labelKey: 'nav.passport', path: '/passport' },
+  { labelKey: 'nav.quests', path: '/quests' },
+  { labelKey: 'nav.story', path: '/story' },
+  { labelKey: 'nav.about', path: '/about' },
+  { labelKey: 'nav.contact', path: '/contact' },
+  { labelKey: 'nav.leaderboard', path: '/leaderboard' },
 ];
 
 export function Navbar() {
@@ -63,7 +66,7 @@ export function Navbar() {
                     : 'text-text-secondary hover:text-text-primary hover:bg-gray-100/50',
                 )}
               >
-                {link.label}
+                {t(link.labelKey)}
                 {pathname === link.path && (
                   <motion.span
                     layoutId="nav-active"
@@ -75,7 +78,8 @@ export function Navbar() {
             ))}
           </div>
 
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-1">
+            <LanguageSwitcher />
             {user ? (
               <>
                 <Link to="/dashboard">
@@ -142,9 +146,12 @@ export function Navbar() {
                       : 'text-text-secondary hover:text-text-primary hover:bg-gray-50',
                   )}
                 >
-                  {link.label}
+                  {t(link.labelKey)}
                 </Link>
               ))}
+              <div className="px-3 py-2">
+                <LanguageSwitcher />
+              </div>
               <hr className="my-3 border-border" />
               {user ? (
                 <>

@@ -9,6 +9,7 @@ import type {
   Quest, Achievement, ChatMessage, ItineraryItem,
   MemoryEntry, Activity, UserPreferences, PassportEntry, StoryChapter,
 } from '../types';
+import { setLanguage } from '../lib/i18n';
 
 interface DataContextType {
   savedPlaces: string[];
@@ -205,6 +206,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       const prefs = data.preferences as UserPreferences;
       setPreferences(prefs);
       if (prefs.darkMode !== undefined) setDarkMode(prefs.darkMode);
+      if (prefs.language) setLanguage(prefs.language);
     }
   };
 
@@ -433,6 +435,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       }
       return next;
     });
+    if (prefs.language) setLanguage(prefs.language);
   }, [userId]);
 
   const toggleDarkMode = useCallback(() => {

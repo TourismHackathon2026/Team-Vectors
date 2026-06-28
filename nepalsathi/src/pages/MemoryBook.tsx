@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { BookOpen, Plus, MapPin, Calendar, Image } from 'lucide-react';
+import { BookOpen, Plus, MapPin, Calendar, Upload, X } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
@@ -15,6 +15,28 @@ export default function MemoryBook() {
   const [showModal, setShowModal] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [form, setForm] = useState({ placeName: '', notes: '', visitDate: new Date().toISOString().split('T')[0] });
+  const [photos, setPhotos] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    Array.from(files).slice(0, 5).forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const result = ev.target?.result;
+        if (typeof result === 'string') {
+          setPhotos((prev) => [...prev, result].slice(0, 5));
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const removePhoto = (index: number) => {
+    setPhotos((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const handleSubmit = () => {
     if (!form.placeName.trim()) return;
@@ -23,9 +45,10 @@ export default function MemoryBook() {
       placeName: form.placeName.trim(),
       visitDate: new Date(form.visitDate).toISOString(),
       notes: form.notes.trim(),
-      photos: [],
+      photos,
     });
     setForm({ placeName: '', notes: '', visitDate: new Date().toISOString().split('T')[0] });
+    setPhotos([]);
     setShowModal(false);
   };
 
@@ -121,10 +144,13 @@ export default function MemoryBook() {
 
                         {entry.photos.length > 0 && (
                           <div className="flex gap-2 mt-3">
-                            {entry.photos.map((_photo, j) => (
-                              <div key={j} className="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center">
-                                <Image className="w-5 h-5 text-text-secondary" />
-                              </div>
+                            {entry.photos.map((photo, j) => (
+                              <img
+                                key={j}
+                                src={photo}
+                                alt={`Photo ${j + 1}`}
+                                className="w-16 h-16 rounded-lg object-cover border border-border"
+                              />
                             ))}
                           </div>
                         )}
@@ -166,6 +192,38 @@ export default function MemoryBook() {
               onChange={(e) => setForm({ ...form, notes: e.target.value })}
               className="w-full px-3.5 py-2.5 rounded-lg border border-border bg-card text-sm text-text-primary placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors resize-none"
             />
+          </div>
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium text-text-primary">Photos</label>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+            <div className="flex flex-wrap gap-2">
+              {photos.map((photo, i) => (
+                <div key={i} className="relative group">
+                  <img src={photo} alt="" className="w-16 h-16 rounded-lg object-cover border border-border" />
+                  <button
+                    onClick={() => removePhoto(i)}
+                    className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+              {photos.length < 5 && (
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-16 h-16 rounded-lg border-2 border-dashed border-border flex items-center justify-center text-text-secondary hover:text-primary hover:border-primary transition-colors"
+                >
+                  <Upload className="w-5 h-5" />
+                </button>
+              )}
+            </div>
           </div>
           <div className="flex gap-3 pt-2">
             <Button variant="ghost" className="flex-1" onClick={() => setShowModal(false)}>Cancel</Button>

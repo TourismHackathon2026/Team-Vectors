@@ -7,6 +7,7 @@ import { Badge } from '../components/ui/Badge';
 import { StarRating } from '../components/ui/StarRating';
 import { featuredSites, features, howItWorks, stats, testimonials } from '../data/heritage';
 import type { HeritageSite } from '../types';
+import { t } from '../lib/i18n';
 
 function HeroSection() {
   return (
@@ -24,7 +25,7 @@ function HeroSection() {
             transition={{ duration: 0.5 }}
           >
             <Badge variant="secondary" size="md" className="mb-6">
-              Your Local Friend for Exploring Nepal
+              {t('hero.badge')}
             </Badge>
           </motion.div>
 
@@ -34,11 +35,11 @@ function HeroSection() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold font-serif text-white leading-tight"
           >
-            Discover Kathmandu,
+            {t('hero.title1')}
             <br />
-            <span className="text-secondary">Explore As</span>
+            <span className="text-secondary">{t('hero.title2')}</span>
             <br />
-            A Local.
+            {t('hero.title3')}
           </motion.h1>
 
           <motion.p
@@ -47,9 +48,7 @@ function HeroSection() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="mt-6 text-lg sm:text-xl text-gray-300 max-w-xl leading-relaxed"
           >
-            Your digital passport to Nepal&apos;s UNESCO World Heritage Sites.
-            Collect stamps, uncover stories, and explore the Valley like a local
-            not a tourist.
+            {t('hero.subtitle')}
           </motion.p>
 
           <motion.div
@@ -91,9 +90,13 @@ function HeritageCard({ site, index }: { site: HeritageSite; index: number }) {
       <Link to={`/heritage/${site.id}`}>
         <Card hover className="group h-full overflow-hidden">
           <div className="relative h-52 -mx-6 -mt-6 mb-5 overflow-hidden bg-gradient-to-br from-primary-900 to-primary-700">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <MapPin className="w-10 h-10 text-white/30" />
-            </div>
+            <img
+              src={site.image}
+              alt={site.name}
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/50 to-transparent">
               <Badge variant="secondary" size="sm">
                 {site.category}

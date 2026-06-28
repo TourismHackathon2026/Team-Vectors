@@ -3,6 +3,7 @@ import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import { ToastContainer } from '../components/ui/Toast';
 import { AIChat } from '../components/AIChat';
+import { ProximityDetector } from '../components/ProximityDetector';
 
 export function Layout() {
   return (
@@ -14,6 +15,7 @@ export function Layout() {
       <Footer />
       <ToastContainer />
       <AIChat />
+      <ProximityDetector />
     </div>
   );
 }

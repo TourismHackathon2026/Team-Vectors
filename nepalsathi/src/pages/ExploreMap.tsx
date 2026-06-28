@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  Search, MapPin, SlidersHorizontal, ExternalLink,
+  Search, SlidersHorizontal, ExternalLink,
   BookmarkCheck, Heart, Route,
 } from 'lucide-react';
 import { MapView } from '../components/MapView';
@@ -176,8 +176,13 @@ export default function ExploreMap() {
                       onClick={() => setSelectedId(place.id)}
                     >
                       <div className="flex gap-3">
-                        <div className="w-16 h-16 rounded-lg shrink-0 bg-gradient-to-br from-primary-900 to-primary-700 flex items-center justify-center">
-                          <MapPin className="w-5 h-5 text-white/40" />
+                        <div className="w-16 h-16 rounded-lg shrink-0 bg-gradient-to-br from-primary-900 to-primary-700 overflow-hidden">
+                          <img
+                            src={place.image}
+                            alt={place.name}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                          />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-1">

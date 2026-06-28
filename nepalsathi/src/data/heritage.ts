@@ -9,8 +9,11 @@ export const heritageSites: HeritageSite[] = [
       'A sprawling complex of palaces, courtyards, and temples that served as the royal seat of the Malla and Shah kings. The square is a living museum of Newari architecture, with intricately carved wooden windows, stone sculptures, and sacred shrines dating back to the 12th century.',
     shortDescription:
       'A majestic ensemble of ancient palaces and temples at the heart of Kathmandu Valley.',
-    image: '',
-    images: [],
+    image: 'https://images.unsplash.com/photo-1597152068980-de3bdd0cdb10?w=800&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1597152068980-de3bdd0cdb10?w=800&q=80',
+      'https://images.unsplash.com/photo-1609457952605-ee4e3b34a5cd?w=800&q=80',
+    ],
     category: 'UNESCO',
     establishedYear: '12th Century',
     entryFee: 'NPR 1,000 (International) / NPR 150 (SAARC)',
@@ -28,8 +31,11 @@ export const heritageSites: HeritageSite[] = [
       'Perched atop a hill west of Kathmandu, the Swayambhunath Stupa — also known as the Monkey Temple — is one of the most sacred Buddhist sites in Nepal. Its gleaming white dome and golden spire, painted with the watchful eyes of the Buddha, offer panoramic views of the valley.',
     shortDescription:
       'The ancient Buddhist stupa atop a hill, offering sweeping views of the Kathmandu Valley.',
-    image: '',
-    images: [],
+    image: 'https://images.unsplash.com/photo-1545151937-1de76c1a1c4f?w=800&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1545151937-1de76c1a1c4f?w=800&q=80',
+      'https://images.unsplash.com/photo-1586374579358-17d3912ee5fa?w=800&q=80',
+    ],
     category: 'UNESCO',
     establishedYear: '5th Century',
     entryFee: 'NPR 200 (International) / NPR 50 (SAARC)',
@@ -47,8 +53,11 @@ export const heritageSites: HeritageSite[] = [
       'One of the holiest Hindu temples dedicated to Lord Shiva, Pashupatinath stretches along the banks of the sacred Bagmati River. The sprawling complex features pagoda-style architecture, cremation ghats, and hundreds of small shrines, drawing sadhus and pilgrims from across the Indian subcontinent.',
     shortDescription:
       'A sacred Hindu temple complex on the banks of the Bagmati River, radiating centuries of devotion.',
-    image: '',
-    images: [],
+    image: 'https://images.unsplash.com/photo-1587402092301-725716c0afc2?w=800&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1587402092301-725716c0afc2?w=800&q=80',
+      'https://images.unsplash.com/photo-1566837945700-30057527ade0?w=800&q=80',
+    ],
     category: 'UNESCO',
     establishedYear: '5th Century',
     entryFee: 'NPR 1,000 (International) / Free (Hindus)',
@@ -66,8 +75,11 @@ export const heritageSites: HeritageSite[] = [
       'One of the largest spherical stupas in the world, Boudhanath is a UNESCO World Heritage Site and a cornerstone of Tibetan Buddhism in Nepal. The massive mandala of its base, the 108 small images of Buddha, and the all-seeing eyes painted on the spire make it an unmissable spiritual landmark.',
     shortDescription:
       'One of the largest Buddhist stupas in the world and a vibrant center of Tibetan culture.',
-    image: '',
-    images: [],
+    image: 'https://images.unsplash.com/photo-1567937503693-9b3a02408805?w=800&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1567937503693-9b3a02408805?w=800&q=80',
+      'https://images.unsplash.com/photo-1595841250570-29f48319ed0a?w=800&q=80',
+    ],
     category: 'UNESCO',
     establishedYear: '5th Century',
     entryFee: 'NPR 400 (International) / NPR 100 (SAARC)',
@@ -85,8 +97,11 @@ export const heritageSites: HeritageSite[] = [
       'The best-preserved of the three Durbar Squares in the valley, Bhaktapur is a medieval city frozen in time. The 55 Window Palace, the towering Nyatapola Temple, and the Golden Gate showcase the pinnacle of Newari craftsmanship and urban planning.',
     shortDescription:
       'A medieval masterpiece of Newari architecture, with cobblestone streets and towering pagodas.',
-    image: '',
-    images: [],
+    image: 'https://images.unsplash.com/photo-1622023327529-e1c0230e14d2?w=800&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1622023327529-e1c0230e14d2?w=800&q=80',
+      'https://images.unsplash.com/photo-1609457952605-ee4e3b34a5cd?w=800&q=80',
+    ],
     category: 'UNESCO',
     establishedYear: '12th Century',
     entryFee: 'NPR 1,500 (International) / NPR 500 (SAARC)',
@@ -104,8 +119,11 @@ export const heritageSites: HeritageSite[] = [
       'Perched on a hilltop east of Kathmandu, Changu Narayan is the oldest Hindu temple in Nepal, dating back to the 4th century. Dedicated to Lord Vishnu, the temple is adorned with some of the finest stone, wood, and metal carvings in the country, including a famous 7th-century inscription.',
     shortDescription:
       'The oldest temple in Nepal, with exquisite stone carvings dating back to the 4th century.',
-    image: '',
-    images: [],
+    image: 'https://images.unsplash.com/photo-1534022948295-1512a05f1789?w=800&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1534022948295-1512a05f1789?w=800&q=80',
+      'https://images.unsplash.com/photo-1622023327529-e1c0230e14d2?w=800&q=80',
+    ],
     category: 'UNESCO',
     establishedYear: '4th Century',
     entryFee: 'NPR 1,000 (International) / NPR 100 (SAARC)',
@@ -123,8 +141,11 @@ export const heritageSites: HeritageSite[] = [
       'The royal square of the ancient city of Lalitpur, Patan Durbar Square is renowned for its exceptional Newari architecture and the Patan Museum, which houses some of the finest bronze sculptures and religious artifacts in South Asia.',
     shortDescription:
       'An architectural gem with the finest collection of Newari art and the renowned Patan Museum.',
-    image: '',
-    images: [],
+    image: 'https://images.unsplash.com/photo-1609457952605-ee4e3b34a5cd?w=800&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1609457952605-ee4e3b34a5cd?w=800&q=80',
+      'https://images.unsplash.com/photo-1597152068980-de3bdd0cdb10?w=800&q=80',
+    ],
     category: 'UNESCO',
     establishedYear: '3rd Century',
     entryFee: 'NPR 1,000 (International) / NPR 250 (SAARC)',
@@ -142,8 +163,11 @@ export const heritageSites: HeritageSite[] = [
       'The birthplace of Lord Buddha, Lumbini is one of the most important pilgrimage sites in the world. The Mayadevi Temple marks the exact spot where Siddhartha Gautama was born in 623 BCE. The surrounding Sacred Garden is dotted with monastic zones built by Buddhist communities from around the globe.',
     shortDescription:
       'The birthplace of Buddha, a serene pilgrimage site with monasteries from around the world.',
-    image: '',
-    images: [],
+    image: 'https://images.unsplash.com/photo-1623063323494-a390fb126b47?w=800&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1623063323494-a390fb126b47?w=800&q=80',
+      'https://images.unsplash.com/photo-1566837945700-30057527ade0?w=800&q=80',
+    ],
     category: 'UNESCO',
     establishedYear: '623 BCE',
     entryFee: 'Free (Indian/Nepali) / NPR 200 (Other SAARC) / NPR 1,000 (Others)',
@@ -161,8 +185,11 @@ export const heritageSites: HeritageSite[] = [
       'A UNESCO World Heritage Site and one of Asia\'s best wildlife reserves, Chitwan National Park protects a rich ecosystem of tropical forests, grasslands, and wetlands. Home to the endangered one-horned rhinoceros, Bengal tiger, and over 500 bird species, it offers jungle safaris, canoe rides, and cultural experiences with the Tharu community.',
     shortDescription:
       'A wildlife sanctuary in the Nepali jungle, home to rhinos, tigers, and vibrant Tharu culture.',
-    image: '',
-    images: [],
+    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80',
+      'https://images.unsplash.com/photo-1586374579358-17d3912ee5fa?w=800&q=80',
+    ],
     category: 'UNESCO',
     establishedYear: '1973',
     entryFee: 'NPR 1,500 (International) / NPR 750 (SAARC) / NPR 200 (Nepali)',
@@ -180,8 +207,11 @@ export const heritageSites: HeritageSite[] = [
       'Home to the world\'s highest peak, Mount Everest, Sagarmatha National Park is a breathtaking landscape of towering peaks, glaciers, and deep valleys. The park is a sanctuary for rare species like the snow leopard and red panda, and its trails lead through Sherpa villages with centuries-old monasteries.',
     shortDescription:
       'A majestic Himalayan park surrounding Mount Everest, with Sherpa culture and alpine wilderness.',
-    image: '',
-    images: [],
+    image: 'https://images.unsplash.com/photo-1586374579358-17d3912ee5fa?w=800&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1586374579358-17d3912ee5fa?w=800&q=80',
+      'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80',
+    ],
     category: 'UNESCO',
     establishedYear: '1976',
     entryFee: 'NPR 3,000 (International) / NPR 1,500 (SAARC) / NPR 100 (Nepali)',

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Search, MapPin } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
@@ -23,9 +23,13 @@ function HeritageCard({ site }: { site: HeritageSite }) {
       <Link to={`/heritage/${site.id}`}>
         <Card hover className="group h-full overflow-hidden">
           <div className="relative h-48 -mx-6 -mt-6 mb-4 overflow-hidden bg-gradient-to-br from-primary-900 to-primary-700">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <MapPin className="w-8 h-8 text-white/30" />
-            </div>
+            <img
+              src={site.image}
+              alt={site.name}
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/50 to-transparent">
               <Badge variant="secondary" size="sm">
                 {site.category}

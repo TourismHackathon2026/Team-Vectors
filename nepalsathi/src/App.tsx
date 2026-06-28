@@ -20,6 +20,7 @@ import Itinerary from './pages/Itinerary';
 import MemoryBook from './pages/MemoryBook';
 import Emergency from './pages/Emergency';
 import Story from './pages/Story';
+import Leaderboard from './pages/Leaderboard';
 
 export default function App() {
   return (
@@ -46,6 +47,7 @@ export default function App() {
                 <Route path="/memory-book" element={<MemoryBook />} />
                 <Route path="/emergency" element={<Emergency />} />
                 <Route path="/story" element={<Story />} />
+                <Route path="/leaderboard" element={<Leaderboard />} />
               </Route>
             </Routes>
           </ToastProvider>
