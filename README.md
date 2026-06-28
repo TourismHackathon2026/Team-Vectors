@@ -1,6 +1,6 @@
 # NepalSathi — Gamified Tourism Discovery for Nepal
 
-A React 19 + TypeScript web app that turns exploring Nepal's heritage sites into an interactive quest with stamps, XP, leaderboards, and AI-powered storytelling.
+Web app that turns exploring Nepal's heritage sites into an interactive quest with stamps, XP, leaderboards, and AI-powered storytelling and help tpurist to explore nepal as a local.
 
 ## Tech Stack
 
